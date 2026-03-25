@@ -1,5 +1,9 @@
 Factory Monitoring System
 
+RTSP 기반 공장 생산 모니터링 시스템 (C# API + WPF + OpenCV + MSSQL)
+> RTSP 기반 영상 분석을 통해 생산량을 자동 감지하고  
+> 재고 및 출고 흐름까지 관리하는 통합 시스템입니다.
+
 # 프로젝트 개요
 공장 설비 및 카메라(RTSP)를 활용하여
 생산 상태를 분석하고 모니터링하는 시스템입니다.
@@ -60,7 +64,6 @@ Factory Monitoring System
 - FactoryClient : WPF 클라이언트
 
 # Database
-
 본 시스템은 생산 - 재고 - 출고 흐름을 관리하는 구조로 설계되었습니다.
 
 # 주요 흐름

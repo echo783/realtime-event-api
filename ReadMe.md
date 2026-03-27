@@ -1,150 +1,93 @@
 # Factory Monitoring System
 
-RTSP 모니터링 시스템 (C# API + WPF + OpenCV + MSSQL)
+RTSP 기반 실시간 데이터 분석 및 API 연동 시스템
+(C#, ASP.NET Core, WPF, OpenCV, MSSQL)
 
-RTSP 기반 영상 분석을 통해 생산량을 자동 감지하고  
-재고 및 출고 흐름까지 관리하는 통합 시스템입니다.
+영상 데이터를 기반으로 이벤트를 감지하고,
+API 및 클라이언트와 연동하여 실시간 상태를 처리하는 시스템입니다.
 
 ---
 
 ## 프로젝트 개요
 
-카메라(RTSP)를 활용하여  
-상태를 분석하고 모니터링하는 시스템입니다.
+본 프로젝트는 RTSP 영상 데이터를 기반으로
+이벤트를 감지하고 상태를 생성하여 API와 클라이언트로 전달하는
+실시간 데이터 처리 시스템입니다.
 
-물체가 1회전하면서 라벨이 인식되면  
-제품 1개 생산으로 판단하는 로직으로 구성하였습니다.
+특정 영역(ROI) 내 객체 변화 및 라벨 진입 이벤트를 기준으로
+상태를 판단하고, 이를 실시간으로 전달하는 구조로 설계하였습니다.
 
-SignalR과 CameraOrchestrator를 연계하여  
-WPF 클라이언트에서 카메라 분석 세션의 Start/Stop을  
-실시간으로 제어할 수 있도록 구현하였습니다.
-
----
-
-## 구성
-
-- Backend: ASP.NET Core API  
-- Client: WPF Desktop (MVVM)  
-- Camera: RTSP  
-- DB: MSSQL  
+또한 SignalR과 CameraOrchestrator를 활용하여
+클라이언트에서 분석 세션을 실시간으로 제어할 수 있도록 구성하였습니다.
 
 ---
 
-## 사용 기술 및 선택 이유
+## 시스템 구성
 
-RTSP (Real Time Streaming Protocol)  
-공장 카메라 영상 스트리밍 처리
-
-OpenCV  
-영상 분석 및 라벨 인식 기반 생산량 카운트 구현
-
-ASP.NET Core API  
-클라이언트와 통신 및 데이터 처리
-
-WPF (MVVM 패턴)  
-실시간 모니터링 UI 구성
-
-MSSQL  
-생산 / 재고 / 출고 데이터 관리
-
-Dapper  
-단순 조회 및 고성능 쿼리 처리
-
-EF Core  
-데이터 삽입 및 복잡한 비즈니스 로직 처리
+* **Backend**: ASP.NET Core API
+* **Client**: WPF Desktop (MVVM)
+* **Vision**: OpenCV
+* **Communication**: SignalR
+* **Database**: MSSQL
 
 ---
 
-## 실행 화면
+## 핵심 기능
 
-- 메인 화면 : images/main.png
-- ROI 분석 : images/ROI.png
-- 납품 등록 : images/납품등록.png
-- 납품 조회 : images/납품조회.png
-- 생산 조회 : images/생산조회.png
-
----
-
-## 주요 기능
-
-- RTSP 영상 분석
-- 생산량 자동 카운트
-- 이미지 캡처 저장
-- 실시간 상태 모니터링
-- 카메라 Start / Stop 제어
-- CRUD 기반 관리 기능
+* RTSP 영상 기반 이벤트 감지
+* 상태 기반 데이터 생성 및 처리
+* 실시간 상태 모니터링 및 제어
+* API 기반 데이터 관리 (CRUD)
+* 외부 시스템 연동 가능한 구조 설계
 
 ---
 
 ## 핵심 기술 포인트
 
-- OpenCV 기반 영상 분석
-- 상태 기반 생산 카운트 로직 구현
-- CameraOrchestrator 기반 세션 관리
-- SignalR을 통한 실시간 제어 및 상태 동기화
-- API와 WPF 간 실시간 연동 구조
+* OpenCV 기반 이벤트 감지 로직 구현
+* ROI 기반 분석 영역 설정 및 처리
+* CameraOrchestrator 기반 세션 관리 구조
+* SignalR 기반 실시간 데이터 전달
+* API 중심 아키텍처 설계
+* 클라이언트-서버 간 상태 동기화 구조 구현
+
+---
+
+## 사용 기술
+
+* RTSP (영상 스트리밍)
+* OpenCV (영상 분석)
+* ASP.NET Core API (데이터 처리 및 통신)
+* SignalR (실시간 통신)
+* WPF (MVVM 기반 클라이언트 UI)
+* MSSQL (데이터 저장)
+* Dapper / EF Core (데이터 접근)
+
+---
+
+## 실행 화면
+
+(포트폴리오 PDF 참고)
 
 ---
 
 ## 프로젝트 구조
 
-- FactoryApi : ASP.NET Core API 서버  
-- FactoryClient : WPF 클라이언트  
-- docs : 문서 및 이미지  
+* **FactoryApi** : ASP.NET Core API 서버
+* **FactoryClient** : WPF 클라이언트
+* **docs** : 문서 및 포트폴리오 자료
 
 ---
 
-## 데이터베이스 설계
+## 기술적 특징
 
-본 시스템은 생산 -> 재고 -> 출고 흐름을 기준으로 설계되었습니다.
-
-### 주요 테이블
-
-CameraConfig  
-카메라 설정 및 RTSP 주소 관리  
-
-ProductionEvent  
-카메라를 통해 감지된 생산 이벤트 기록  
-
-Inventory  
-생산된 제품의 현재 재고 수량 관리  
-
-Delivery  
-납품처 정보 관리  
-
-DeliveryItem  
-납품 요청 및 수량 정보  
-
-StockOutHistory  
-실제 출고 이력 기록  
-출고 제품, 시간, 수량 추적 가능  
+* 실시간 데이터 처리 및 상태 기반 로직 구현
+* API 중심 구조 설계 및 클라이언트 연동
+* 외부 장비/데이터 연동을 고려한 확장 가능한 구조
+* 영상 분석을 활용한 이벤트 기반 처리 시스템 구현
 
 ---
 
-## 데이터 흐름
+## Portfolio
 
-카메라(RTSP)를 통해 생산 이벤트를 감지하고  
-ProductionEvent로 저장합니다.
-
-생산 완료된 제품은 Inventory에 반영합니다.
-
-납품 요청은 DeliveryItem으로 관리하며  
-최종 출고 시 StockOutHistory에 기록됩니다.
-
-생산과 재고 반영을 분리하여  
-현장 프로세스를 반영한 구조로 설계하였습니다.
-
----
-
-## 특징
-
-카메라 기반 생산 자동화 시스템 구현  
-실시간 제어 및 상태 반영  
-영상 분석과 재고/출고 시스템 통합  
-
----
-
-rtsp test image 는 요청시 제공드리겠습니다.
-
-
-
+* [Factory Monitoring Portfolio PDF](docs/JeongChanwook_Factory_Monitoring_Portfolio.pdf)

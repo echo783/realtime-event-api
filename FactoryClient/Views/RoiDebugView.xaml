@@ -37,7 +37,7 @@
                          IsReadOnly="True"
                          Background="White"
                          BorderBrush="#CBD5E1"
-                         Text="https://localhost:7125/index.html"/>
+                         Text="https://localhost:7125/login.html"/>
             </DockPanel>
         </Border>
 

@@ -304,7 +304,7 @@ namespace FactoryApi.Services.CameraRuntime
                     snapshotPath,
                     token);
 
-                _logger.LogInformation(
+                _logger.LogDebug(
                     "COUNT HIT! CameraId={CameraId}, ProductName={ProductName}, Count={Count}",
                     _cameraId,
                     config.ProductName,

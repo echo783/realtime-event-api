@@ -5,7 +5,7 @@ namespace FactoryClient.Views
 {
     public partial class RoiDebugView : UserControl
     {
-        private const string RoiUrl = "https://localhost:7125/index.html";
+        private const string RoiUrl = "https://localhost:7125/login.html";
 
         public RoiDebugView()
         {

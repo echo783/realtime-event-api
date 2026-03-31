@@ -121,7 +121,7 @@ namespace FactoryApi.Services.CameraRuntime
             _state.LastDetectorConfidence = detectorConfidence;
             _state.LastUpdatedAt = now;
 
-            _logger.LogInformation(
+            _logger.LogDebug(
                 "Analyze | Rot={Rot} Started={Started} Ended={Ended} " +
                 "PrevLabel={PrevLabel} LabelZone={LabelZone} Enter={Enter} Exit={Exit} " +
                 "Detector={Detector} Conf={Conf:F2} OffStreak={OffStreak} " +

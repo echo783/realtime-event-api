@@ -155,7 +155,7 @@ namespace FactoryApi.Services.CameraRuntime
                             _sessions.Add(cam.CameraId, runner);
                             await runner.StartAsync(stoppingToken);
 
-                            _logger.LogInformation(
+                            _logger.LogDebug(
                                 "Camera session added. CameraId={CameraId}, CameraName={CameraName}, RtspUrl={RtspUrl}",
                                 cam.CameraId,
                                 cam.CameraName,

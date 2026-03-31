@@ -5,9 +5,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using FactoryApi.Hubs;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Authorization;
 
 namespace FactoryApi.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CameraController : ControllerBase
@@ -88,6 +90,7 @@ namespace FactoryApi.Controllers
         }
 
         // 5. 최신 이미지 반환
+        [AllowAnonymous]
         [HttpGet("{cameraId:int}/image")]
         public async Task<IActionResult> GetImage(int cameraId, CancellationToken ct)
         {
@@ -233,7 +236,7 @@ namespace FactoryApi.Controllers
             var session = _orchestrator.GetSession(cameraId);
             session?.ResetAnalysisState();
 
-            _logger.LogInformation(
+            _logger.LogDebug(
                 "ROI SAVED | CameraId={CameraId} Obj=({OX},{OY},{OW},{OH}) Label=({LX},{LY},{LW},{LH})",
                 cameraId,
                 cam.ObjectRoiX, cam.ObjectRoiY, cam.ObjectRoiW, cam.ObjectRoiH,
@@ -411,6 +414,8 @@ namespace FactoryApi.Controllers
 
             return Ok(payload);
         }
+
+
 
     }
 

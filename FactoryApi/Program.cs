@@ -4,6 +4,10 @@ using FactoryApi.Repositories;
 using FactoryApi.Services;
 using FactoryApi.Services.CameraRuntime;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
+using FactoryApi.Services.Auth;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +31,30 @@ builder.Services.AddDbContext<FactoryDbContext>(options =>
 builder.Services.AddSingleton<SqlConnectionFactory>();
 builder.Services.AddScoped<DeliveryRepository>();
 
+builder.Services.AddScoped<JwtTokenService>();
+
+var jwtKey = builder.Configuration["Jwt:Key"]!;
+var jwtIssuer = builder.Configuration["Jwt:Issuer"]!;
+var jwtAudience = builder.Configuration["Jwt:Audience"]!;
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwtIssuer,
+            ValidateAudience = true,
+            ValidAudience = jwtAudience,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 // ======================================================
 // Logging
@@ -107,7 +135,7 @@ app.UseHttpsRedirection();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

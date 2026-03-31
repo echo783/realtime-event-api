@@ -1,0 +1,42 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>운영자 로그인</title>
+</head>
+<body>
+    <h2>운영자 로그인</h2>
+
+    <input type="text" id="username" placeholder="아이디">
+    <input type="password" id="password" placeholder="비밀번호">
+    <button onclick="login()">로그인</button>
+
+    <script>
+        async function login() {
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+
+            const res = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                alert(data.message || "로그인 실패");
+                return;
+            }
+
+            localStorage.setItem("accessToken", data.accessToken);
+            localStorage.setItem("username", data.username);
+
+            alert("로그인 성공");
+            location.href = "/index.html";
+        }
+    </script>
+</body>
+</html>

@@ -5,7 +5,7 @@
     <title>Factory API 운영 메인</title>
     <style>
         body {
-            font-family: Arial;
+            font-family: Arial, sans-serif;
             padding: 20px;
         }
 
@@ -30,6 +30,13 @@
     <div id="userInfo"></div>
     <button onclick="checkAuth()">인증 확인</button>
 
+    <div style="margin-top:20px; padding:10px; border:1px solid #ccc;">
+        <h3>🔧 개발용 토큰</h3>
+        <button onclick="copyAccessToken()">AccessToken 복사</button>
+        <div id="token-expire"></div>
+        <div id="token-status" style="margin-top:10px; color:green;"></div>
+    </div>
+
     <div class="card">
         <h3>📷 카메라 기능</h3>
         <button onclick="startCamera()">카메라 시작</button>
@@ -43,143 +50,7 @@
         <h3>⚙️ 시스템</h3>
         <button onclick="logout()">로그아웃</button>
     </div>
-    <script>
-        const token = localStorage.getItem("accessToken");
-        const username = localStorage.getItem("username");
-        const cameraStatusEl = document.getElementById("cameraStatus");
 
-        // 🔐 로그인 체크
-        if (!token) {
-            alert("로그인이 필요합니다.");
-            location.href = "/login.html";
-        }
-
-        document.getElementById("userInfo").innerText =
-            (username || "운영자") + " 님 로그인됨";
-
-        loadCameraStatus();
-
-        function goRoi() {
-            location.href = "/roi.html";
-        }
-
-        function logout() {
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("username");
-            location.href = "/login.html";
-        }
-
-       async function checkAuth() {
-
-            const res = await fetch("/api/secure/me", {
-                method: "GET",
-            headers: {
-                "Authorization": "Bearer " + token
-                }
-            });
-             
-           if (res.status === 401) {
-               alert("세션 만료. 다시 로그인하세요.");
-               location.href = "/login.html";
-               return;
-           }
-
-            if (!res.ok) {
-                alert("인증 실패");
-            return;
-           }
-
-           const data = await res.json();
-
-            alert(data.message + " / 사용자: " + data.username);
-        }
-
-        function authHeaders(extra = {}) {
-            return {
-                "Authorization": "Bearer " + token,
-                ...extra
-            };
-        }
-
-        async function startCamera() {
-            const cameraId = 1;
-
-            const res = await fetch(`/api/Camera/${cameraId}/start`, {
-                method: "POST",
-                headers: authHeaders()
-            });
-
-            if (res.status === 401) {
-                alert("세션 만료. 다시 로그인하세요.");
-                location.href = "/login.html";
-                return;
-            }
-
-            if (!res.ok) {
-                alert("카메라 시작 실패");
-                return;
-            }
-
-            alert("카메라 시작 요청 완료");
-            await loadCameraStatus();
-        }
-
-        async function stopCamera() {
-            const cameraId = 1;
-
-            const res = await fetch(`/api/Camera/${cameraId}/stop`, {
-                method: "POST",
-                headers: authHeaders()
-            });
-
-            if (res.status === 401) {
-                alert("세션 만료. 다시 로그인하세요.");
-                location.href = "/login.html";
-                return;
-            }
-
-            if (!res.ok) {
-                alert("카메라 중지 실패");
-                return;
-            }
-
-            alert("카메라 중지 요청 완료");
-            await loadCameraStatus();
-        }
-
-        async function loadCameraStatus() {
-            const cameraId = 1;
-
-            const res = await fetch(`/api/Camera/${cameraId}/status`, {
-                headers: authHeaders()
-            });
-
-            if (res.status === 401) {
-                alert("세션 만료. 다시 로그인하세요.");
-                location.href = "/login.html";
-                return;
-            }
-
-            if (!res.ok) {
-                cameraStatusEl.textContent = "카메라 상태 조회 실패";
-                return;
-            }
-
-            const data = await res.json();
-
-            cameraStatusEl.textContent =
-                `CameraId: ${data.cameraId}
-                CameraName: ${data.cameraName}
-                Enabled: ${data.enabled}
-                Status: ${data.status}
-                Message: ${data.message}
-                ChangedAt: ${data.changedAt}`;
-        }
-
-
-
-
-    </script>
-
+    <script src="/js/index.js"></script>
 </body>
 </html>

@@ -1,13 +1,15 @@
+using FactoryApi.Application.Camera;
 using FactoryApi.Hubs;
-using FactoryApi.Services.CameraRuntime;
-using Microsoft.EntityFrameworkCore;
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
 using FactoryApi.Infrastructure.Auth;
 using FactoryApi.Infrastructure.CameraRuntime;
 using FactoryApi.Infrastructure.MediaMtx;
 using FactoryApi.Infrastructure.Persistence;
+using FactoryApi.Services.CameraRuntime;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -99,8 +101,14 @@ builder.Services.Configure<MediaMtxOptions>(
     builder.Configuration.GetSection("MediaMtx"));
 
 builder.Services.AddSingleton<MediaMtxConfigWriter>();
-builder.Services.AddHostedService<MediaMtxService>();
+//builder.Services.AddHostedService<MediaMtxService>();
 
+// camera servcie
+builder.Services.AddScoped<CameraQueryService>();
+builder.Services.AddScoped<CameraDebugService>();
+builder.Services.AddScoped<CameraImageService>();
+builder.Services.AddScoped<CameraRoiService>();
+builder.Services.AddScoped<CameraCommandService>();
 
 // ======================================================
 // Camera Runtime
@@ -108,7 +116,7 @@ builder.Services.AddHostedService<MediaMtxService>();
 builder.Services.AddSingleton<SnapshotFileService>();
 builder.Services.AddSingleton<ProductionPersistenceService>();
 builder.Services.AddSingleton<CameraOrchestrator>();
-builder.Services.AddHostedService(sp => sp.GetRequiredService<CameraOrchestrator>());
+//builder.Services.AddHostedService(sp => sp.GetRequiredService<CameraOrchestrator>());
 builder.Services.AddSingleton<ILabelDetector, DummyLabelDetector>();
 
 var app = builder.Build();
@@ -127,11 +135,26 @@ if (app.Environment.IsDevelopment())
 }
 app.MapHub<CameraHub>("/hubs/camera");
 
+var logger = app.Services.GetRequiredService<ILoggerFactory>()
+    .CreateLogger("RequestTrace");
+
+var cs = builder.Configuration.GetConnectionString("DefaultConnection");
+Console.WriteLine("=== DefaultConnection ===");
+Console.WriteLine(cs);
+
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"[REQ] {context.Request.Method} {context.Request.Path}");
+
+    await next();
+
+    Console.WriteLine($"[RES] {context.Response.StatusCode} {context.Request.Path}");
+});
 
 // ======================================================
 // Middleware
 // ======================================================
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseDefaultFiles();
 app.UseStaticFiles();
@@ -139,5 +162,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+ 
 app.Run();

@@ -28,10 +28,10 @@
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 		</None>
 	</ItemGroup>
+	
 	<ItemGroup>
-		<PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.24.4" />
-	</ItemGroup>
-	<ItemGroup>
-	  <Folder Include="Application\" />
+	  <Folder Include="Application\Delivery\" />
+	  <Folder Include="Application\Inventory\" />
+	  <Folder Include="Application\Auth\" />
 	</ItemGroup>
 </Project>

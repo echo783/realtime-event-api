@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using FactoryApi.Models;
-using FactoryApi.Infrastructure.Persistence;
 
-namespace FactoryApi.Services.CameraRuntime
+namespace FactoryApi.Infrastructure.Persistence
 {
     public sealed class ProductionPersistenceService
     {

@@ -1,4 +1,5 @@
 ﻿using FactoryApi.Contracts.Requests.Camera;
+using FactoryApi.Contracts.Responses.Camera;
 using FactoryApi.Infrastructure.CameraRuntime;
 using FactoryApi.Infrastructure.Persistence;
 using FactoryApi.Models;
@@ -18,7 +19,7 @@ namespace FactoryApi.Application.Camera
             _orchestrator = orchestrator;
         }
 
-        public async Task<CameraControlStatusDto?> StartCameraAsync(int cameraId, CancellationToken token)
+        public async Task<CameraRunStatusResponse?> StartCameraAsync(int cameraId, CancellationToken token)
         {
 
             var cam = await _context.CameraConfigs
@@ -41,7 +42,7 @@ namespace FactoryApi.Application.Camera
                 await _context.SaveChangesAsync(token);
             }
 
-            var payload = new CameraControlStatusDto
+            var payload = new CameraRunStatusResponse
             {
                 CameraId = cam.CameraId,
                 CameraName = cam.CameraName,
@@ -54,7 +55,7 @@ namespace FactoryApi.Application.Camera
             return payload;
         }
 
-        public  async Task<CameraControlStatusDto?> StopCameraAsync(int cameraId, CancellationToken token)
+        public  async Task<CameraRunStatusResponse?> StopCameraAsync(int cameraId, CancellationToken token)
         {
             var cam = await _context.CameraConfigs
                .FirstOrDefaultAsync(x => x.CameraId == cameraId, token);
@@ -76,7 +77,7 @@ namespace FactoryApi.Application.Camera
                 await _context.SaveChangesAsync(token);
             }
 
-            var payload = new CameraControlStatusDto
+            var payload = new CameraRunStatusResponse
             {
                 CameraId = cam.CameraId,
                 CameraName = cam.CameraName,
@@ -89,7 +90,7 @@ namespace FactoryApi.Application.Camera
             return payload;
         }
 
-        public async Task<CameraControlStatusDto?> GetRunStatusAsync(int cameraId, CancellationToken token)
+        public async Task<CameraRunStatusResponse?> GetRunStatusAsync(int cameraId, CancellationToken token)
         {
             var cam = await _context.CameraConfigs
                 .FirstOrDefaultAsync(x => x.CameraId == cameraId, token);
@@ -109,7 +110,7 @@ namespace FactoryApi.Application.Camera
             else
                 message = "중지 요청 상태이지만 세션 정리 중일 수 있습니다.";
 
-            var payload = new CameraControlStatusDto
+            var payload = new CameraRunStatusResponse
             {
                 CameraId = cam.CameraId,
                 CameraName = cam.CameraName,

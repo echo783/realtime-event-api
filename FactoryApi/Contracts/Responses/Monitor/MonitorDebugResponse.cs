@@ -1,6 +1,6 @@
-﻿namespace FactoryApi.Models
+﻿namespace FactoryApi.Contracts.Responses.Monitor
 {
-    public sealed class DebugDto
+    public sealed class MonitorDebugResponse
     {
         public bool RotationActive { get; set; }
         public bool LabelInZone { get; set; }

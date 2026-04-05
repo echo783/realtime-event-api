@@ -1,5 +1,5 @@
-﻿using FactoryApi.Infrastructure.CameraRuntime;
-using FactoryApi.Models;
+﻿using FactoryApi.Application.Monitor;   
+using FactoryApi.Contracts.Responses.Monitor;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FactoryApi.Controllers
@@ -8,31 +8,26 @@ namespace FactoryApi.Controllers
     [Route("api/[controller]")]
     public sealed class MonitorController : ControllerBase
     {
-        private readonly CameraOrchestrator _cameraOrchestrator;
+        private readonly MonitorQueryService _monitorQueryService;
 
-        public MonitorController(CameraOrchestrator cameraOrchestrator)
+        public MonitorController(MonitorQueryService monitorQueryService)
         {
-            _cameraOrchestrator = cameraOrchestrator;
+            _monitorQueryService = monitorQueryService;
         }
 
         [HttpGet("status")]
-        public IActionResult GetStatus()
+        public ActionResult<MonitorStatusResponse> GetStatus()
         {
-            var dto = new
-            {
-                cameraCount = _cameraOrchestrator.GetCameraCount(),
-                workerStatus = "running",
-                serverTime = DateTime.Now
-            };
-
+            var dto = _monitorQueryService.GetStatus();
             return Ok(dto);
         }
 
         [HttpGet("debug/{cameraId:int}")]
-        public ActionResult<DebugDto> GetDebug(int cameraId)
+        public ActionResult<MonitorDebugResponse> GetDebug(int cameraId)
         {
-            var state = _cameraOrchestrator.GetDebugState(cameraId);
-            if (state == null)
+            var dto = _monitorQueryService.GetDebug(cameraId);
+            
+            if (dto == null) 
             {
                 return NotFound(new
                 {
@@ -40,49 +35,20 @@ namespace FactoryApi.Controllers
                 });
             }
 
-            var dto = new DebugDto
-            {
-                RotationActive = state.RotationActive,
-                LabelInZone = state.LabelInZone,
-
-                LastStarted = state.LastStarted,
-                LastEnded = state.LastEnded,
-                LastLabelEnter = state.LastLabelEnter,
-
-                LastRotationChangeValue = state.LastRotationChangeValue,
-                LastMotionRatio = state.LastMotionRatio,
-                LastLabelChangeValue = state.LastLabelChangeValue,
-
-                ProductionCount = state.ProductionCount,
-
-                LastProductionAt = state.LastProductionAt == DateTime.MinValue
-                    ? (DateTime?)null
-                    : state.LastProductionAt
-            };
-
             return Ok(dto);
         }
 
         [HttpGet("production/{cameraId:int}")]
-        public IActionResult GetProduction(int cameraId)
+        public ActionResult<MonitorProductionResponse> GetProduction(int cameraId)
         {
-            var state = _cameraOrchestrator.GetDebugState(cameraId);
-            if (state == null)
+            var dto = _monitorQueryService.GetProduction(cameraId);
+            if (dto == null)
             {
                 return NotFound(new
                 {
                     message = $"Camera not found. id={cameraId}"
                 });
             }
-
-            var dto = new
-            {
-                cameraId = cameraId,
-                productionCount = state.ProductionCount,
-                lastProductionAt = state.LastProductionAt == DateTime.MinValue
-                    ? (DateTime?)null
-                    : state.LastProductionAt
-            };
 
             return Ok(dto);
         }

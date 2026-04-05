@@ -1,4 +1,4 @@
-﻿namespace FactoryApi.Models
+﻿namespace FactoryApi.Contracts.Requests.Delivery
 {
     public class DeliveryCreateRequest
     {

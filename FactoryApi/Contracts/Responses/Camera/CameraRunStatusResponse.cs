@@ -1,6 +1,6 @@
-﻿namespace FactoryApi.Models
+﻿namespace FactoryApi.Contracts.Responses.Camera
 {
-    public class CameraControlStatusDto
+    public class CameraRunStatusResponse
     {
         public int CameraId { get; set; }
         public string CameraName { get; set; } = string.Empty;

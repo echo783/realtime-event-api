@@ -1,5 +1,4 @@
 ﻿using FactoryApi.Infrastructure.Persistence;
-using FactoryApi.Services.CameraRuntime;
 using Microsoft.EntityFrameworkCore;
 
 namespace FactoryApi.Infrastructure.CameraRuntime

@@ -1,7 +1,6 @@
 ﻿using FactoryApi.Contracts.Responses.Camera;
 using FactoryApi.Infrastructure.CameraRuntime;
 using FactoryApi.Infrastructure.Persistence;
-using FactoryApi.Services.CameraRuntime;
 using Microsoft.EntityFrameworkCore;
 
 namespace FactoryApi.Application.Camera

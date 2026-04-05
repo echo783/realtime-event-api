@@ -1,5 +1,4 @@
-﻿using FactoryApi.Services.CameraRuntime;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using OpenCvSharp;
 
 namespace FactoryApi.Infrastructure.CameraRuntime

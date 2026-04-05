@@ -1,6 +1,6 @@
-﻿using System.Data;
-using Dapper;
-using FactoryApi.Models;
+﻿using Dapper;
+using FactoryApi.Contracts.Requests.Delivery;
+using FactoryApi.Contracts.Responses.Delivery;
 
 namespace FactoryApi.Infrastructure.Persistence
 {
@@ -202,7 +202,7 @@ VALUES
             public DateTime CreatedAt { get; set; }
         }
 
-        public async Task<List<DeliveryListDto>> GetListAsync()
+        public async Task<List<DeliveryListResponse>> GetListAsync()
         {
             using var conn = _connectionFactory.CreateConnection();
 
@@ -222,7 +222,7 @@ INNER JOIN dbo.DeliveryItem di
 ORDER BY d.DeliveryId DESC;
 ";
 
-            var list = await conn.QueryAsync<DeliveryListDto>(sql);
+            var list = await conn.QueryAsync<DeliveryListResponse>(sql);
 
             return list.ToList();
         }

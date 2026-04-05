@@ -1,6 +1,6 @@
-﻿namespace FactoryApi.Models
+﻿namespace FactoryApi.Contracts.Responses.Delivery
 {
-    public class DeliveryListDto
+    public class DeliveryListResponse
     {
         public long DeliveryId { get; set; }
         public DateTime DeliveryDate { get; set; }

@@ -1,7 +1,7 @@
 ﻿using FactoryApi.Models;
 using OpenCvSharp;
 
-namespace FactoryApi.Services.CameraRuntime
+namespace FactoryApi.Infrastructure.CameraRuntime
 {
     public static class RoiRectHelper
     {

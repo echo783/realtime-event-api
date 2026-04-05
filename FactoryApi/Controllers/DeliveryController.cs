@@ -1,5 +1,5 @@
-﻿using FactoryApi.Infrastructure.Persistence;
-using FactoryApi.Models;
+﻿using FactoryApi.Contracts.Requests.Delivery;
+using FactoryApi.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FactoryApi.Controllers

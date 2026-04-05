@@ -1,5 +1,5 @@
-﻿using FactoryApi.Models;
-using FactoryApi.Services.CameraRuntime;
+﻿using FactoryApi.Infrastructure.Persistence;
+using FactoryApi.Models;
 using OpenCvSharp;
 
 namespace FactoryApi.Infrastructure.CameraRuntime

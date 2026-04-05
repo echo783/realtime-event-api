@@ -5,18 +5,17 @@ namespace FactoryApi.Application.Monitor
 {
     public sealed class MonitorQueryService
     {
-        private readonly CameraOrchestrator _cameraOrchestrator;
-
-        public MonitorQueryService(CameraOrchestrator cameraOrchestrator)
+        private readonly ICameraRuntimeReader _cameraRuntimeReader;
+        public MonitorQueryService( ICameraRuntimeReader cameraRuntimeReader)
         {
-            _cameraOrchestrator = cameraOrchestrator;
+            _cameraRuntimeReader = cameraRuntimeReader;
         }
 
         public MonitorStatusResponse GetStatus()
         {
             return new MonitorStatusResponse
             {
-                CameraCount = _cameraOrchestrator.GetCameraCount(),
+                CameraCount = _cameraRuntimeReader.GetCameraCount(),
                 WorkStatus = "running",
                 ServerTime = DateTime.Now
             };
@@ -24,7 +23,7 @@ namespace FactoryApi.Application.Monitor
 
         public MonitorDebugResponse? GetDebug(int cameraId)
         {
-            var state = _cameraOrchestrator.GetDebugState(cameraId);
+            var state = _cameraRuntimeReader.GetDebugState(cameraId);
             if (state == null)
             {
                return null;
@@ -55,7 +54,7 @@ namespace FactoryApi.Application.Monitor
 
         public MonitorProductionResponse? GetProduction(int cameraId)
         {
-            var state = _cameraOrchestrator.GetDebugState(cameraId);
+            var state = _cameraRuntimeReader.GetDebugState(cameraId);
             if(state == null)
             {
                 return null;

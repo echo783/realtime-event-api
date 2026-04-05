@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FactoryApi.Infrastructure.CameraRuntime
 {
-    public sealed class CameraOrchestrator : BackgroundService
+    public sealed class CameraOrchestrator : BackgroundService,ICameraRuntimeReader
     {
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<CameraOrchestrator> _logger;

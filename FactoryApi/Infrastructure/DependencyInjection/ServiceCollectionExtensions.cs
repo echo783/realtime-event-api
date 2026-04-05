@@ -70,6 +70,7 @@ namespace FactoryApi.Infrastructure.DependencyInjection
             services.AddSingleton<SnapshotFileService>();
             services.AddSingleton<ProductionPersistenceService>();
             services.AddSingleton<CameraOrchestrator>();
+            services.AddSingleton<ICameraRuntimeReader>(sp => sp.GetRequiredService<CameraOrchestrator>());
             services.AddSingleton<ILabelDetector, DummyLabelDetector>();
 
             return services;

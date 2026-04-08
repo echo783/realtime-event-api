@@ -1,110 +1,120 @@
 # Factory Monitoring System
 
-RTSP 기반 실시간 영상 분석 및 API 중심 모니터링 시스템
-(C#, ASP.NET Core, OpenCV, MSSQL, Web UI)
+> RTSP 기반 영상 데이터를 실시간 이벤트로 변환하여 API로 제공하는 시스템
+
+RTSP 기반 실시간 영상 분석 및 이벤트 처리 시스템  
+(C#, ASP.NET Core, SignalR, OpenCV, MSSQL)
 
 ---
 
-## 프로젝트 개요
+## Overview
 
-본 프로젝트는 RTSP 영상 스트림을 분석하여
-특정 영역(ROI)에서 발생하는 이벤트를 감지하고,
-이를 상태 데이터로 변환하여 API를 통해 관리하는 시스템입니다.
+RTSP 카메라 스트림을 분석하여  
+특정 영역(ROI)에서 발생하는 이벤트를 감지하고  
+이를 **실시간 상태 데이터로 변환하여 API로 제공하는 시스템**입니다.
 
-웹 기반 운영 UI를 통해
-카메라 제어, 상태 조회, ROI 설정을 통합적으로 수행할 수 있도록 설계하였습니다.
-
----
-
-## 시스템 구성
-
-* **Backend**: ASP.NET Core API
-* **Vision**: OpenCV (OpenCvSharp)
-* **Web UI**: HTML / JavaScript
-* **Communication**: SignalR
-* **Database**: MSSQL (EF Core + Dapper)
+운영자는 웹 UI를 통해  
+카메라 제어, 상태 모니터링, ROI 설정을 실시간으로 수행할 수 있습니다.
 
 ---
 
-## 핵심 기능
+## Key Features
 
-* RTSP 영상 기반 이벤트 감지
-* ROI 영역 기반 객체 변화 및 라벨 진입 판단
-* 생산 이벤트(Count) 생성 및 상태 관리
-* 카메라 제어 API (Start / Stop / Status)
-* ROI 설정 및 저장 기능
-* JWT 기반 인증 및 보호된 API
-
----
-
-## 기술적 특징
-
-* OpenCV 기반 프레임 변화량 분석 로직 구현
-* ROI 기반 이벤트 감지 구조 설계
-* CameraOrchestrator 기반 런타임 세션 관리
-* API 중심 아키텍처 설계
-  (Controller → Application → Infrastructure)
-* DTO 기반 요청/응답 모델 분리
-* EF Core + Dapper 혼합 데이터 접근 구조
+- RTSP 영상 기반 실시간 이벤트 감지
+- ROI 기반 객체 변화 및 라벨 진입 판단
+- 생산 이벤트(Count) 생성 및 상태 관리
+- 카메라 제어 API (Start / Stop / Status)
+- SignalR 기반 실시간 상태 전송
+- ROI 설정 및 디버그 기능
+- JWT 기반 인증 및 보호된 API
 
 ---
 
-## 웹 운영 기능
+## Architecture
+Controller → Application → Infrastructure
+↓
+Camera Runtime (OpenCV)
+↓
+MSSQL
 
-* 로그인 (JWT 인증)
-* 카메라 상태 조회 및 제어
-* 실시간 상태 모니터링
-* ROI 디버그 페이지 (좌표 수정 및 저장)
-* 인증 기반 접근 제어 ([Authorize])
+
+- API 중심 구조로 웹 UI 및 외부 시스템과 확장 가능
+- 런타임 영상 처리와 비즈니스 로직 분리
+- DTO 기반 요청/응답 모델 분리
 
 ---
 
-## 프로젝트 구조
+## Tech Stack
 
+- Backend: ASP.NET Core
+- Vision: OpenCvSharp (OpenCV)
+- Communication: SignalR
+- Database: MSSQL (EF Core + Dapper)
+- Frontend: HTML / JavaScript
+
+---
+
+## Technical Highlights
+
+- OpenCV 기반 프레임 변화량 분석 로직 직접 구현
+- ROI 기반 이벤트 감지 구조 설계
+- CameraOrchestrator 기반 런타임 세션 관리
+- EF Core + Dapper 혼합 구조로 성능과 생산성 균형
+- 실시간 데이터 처리 및 상태 관리 구조 설계
+
+---
+
+## Web UI
+
+- 로그인 (JWT 인증)
+- 카메라 상태 조회 및 제어
+- 실시간 상태 모니터링
+- ROI 디버그 페이지 (좌표 수정 및 저장)
+
+---
+
+## Project Structure
 FactoryApi
-
-* Controllers
-* Application (서비스 계층)
-* Contracts (Request / Response DTO)
-* Infrastructure
-
-  * CameraRuntime (영상 처리 / 런타임 로직)
-  * Persistence (DB 접근)
-  * DependencyInjection
-* Models (Entity)
-* wwwroot (Web UI)
+├─ Controllers
+├─ Application
+├─ Contracts
+├─ Infrastructure
+│ ├─ CameraRuntime
+│ ├─ Persistence
+│ └─ DependencyInjection
+├─ Models
+└─ wwwroot
 
 docs
+└─ Portfolio 자료
 
-* 포트폴리오 자료
 
----
-
-## 아키텍처 특징
-
-* 실시간 영상 데이터를 기반으로 상태를 생성하는 이벤트 중심 구조
-* API 중심 설계로 웹 UI 및 외부 시스템과의 확장성 확보
-* 런타임 처리와 비즈니스 로직을 분리하여 유지보수성 개선
-* 장비(RTSP 카메라) 연동 기반 시스템 구현 경험
 
 ---
 
-## 포트폴리오
+## What I Focused On
 
-* Factory Monitoring Portfolio PDF
+- 실시간 영상 데이터를 **이벤트 기반 상태로 변환하는 구조 설계**
+- API 중심 아키텍처로 확장성과 유지보수성 확보
+- 장비(RTSP 카메라) 연동 기반 시스템 구현 경험
+- Runtime / Application / Infrastructure 계층 분리
+
+---
+
+## Future Improvements
+
+- Camera Runtime 인터페이스화 (ICameraRuntimeManager)
+- Detection 모듈 분리
+- Query / Command 구조 개선
+- Logging 및 모니터링 구조 강화
+- Domain 구조 개선
+
+---
+
+## Portfolio
+
+- Factory Monitoring Portfolio PDF  
   docs/JeongChanwook_Factory_Monitoring_Portfolio.pdf
 
-※ 해당 PDF는 초기 WPF 클라이언트 기반 구조를 기준으로 작성되었으며,
-현재는 API 중심 아키텍처로 리팩토링하여 웹 기반 운영 구조로 확장 중입니다.
 
----
 
-## 향후 개선 방향
-
-* Camera Runtime 인터페이스화 (ICameraRuntimeManager)
-* Detection 모듈 분리 및 확장 구조 개선
-* Application 계층 표준화 (Query / Command 분리)
-* Logging 및 모니터링 구조 개선
-* Models → Domain/Entities 구조 개선
-
----

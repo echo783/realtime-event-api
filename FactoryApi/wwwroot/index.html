@@ -6,50 +6,84 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-
-        .card {
-            border: 1px solid #ddd;
-            padding: 20px;
-            margin-top: 20px;
-            border-radius: 10px;
-        }
-
-        button {
-            padding: 10px 15px;
-            margin: 5px;
-            cursor: pointer;
+            margin: 0;
         }
     </style>
+    <link rel="stylesheet" href="/css/index.css" />
 </head>
 <body>
+    <header class="topbar">
+        <div class="topbar__title">Factory API 운영 메인</div>
+        <div class="topbar__right">
+            <div id="userInfo" class="topbar__user"></div>
+            <button onclick="logout()">로그아웃</button>
+        </div>
+    </header>
 
-    <h2>🏭 Factory API 운영 메인</h2>
+    <main class="dashboard">
+        <section class="summary-bar">
+            <div class="summary-item summary-item--primary">
+                <span class="summary-label">현재 카메라</span>
+                <span id="kpiCameraName" class="summary-value">-</span>
+            </div>
+            <div class="summary-item summary-item--primary">
+                <span class="summary-label">카메라 상태</span>
+                <span id="kpiCameraStatus" class="status-badge status--warn">Unknown</span>
+            </div>
+            <div class="summary-item summary-item--primary">
+                <span class="summary-label">마지막 갱신</span>
+                <span id="kpiLastUpdated" class="summary-value summary-value--small">-</span>
+            </div>
+            <div class="summary-item summary-item--secondary">
+                <span class="summary-label">SignalR</span>
+                <span id="hubStateBadge" class="status-badge status--warn">Connecting</span>
+                <span id="kpiHubState" class="summary-value summary-value--small">Connecting</span>
+            </div>
+        </section>
 
-    <div id="userInfo"></div>
-    <button onclick="checkAuth()">인증 확인</button>
+        <div class="content-grid">
+            <section class="main-col">
+                <div class="card card--primary">
+                    <h3>📷 카메라 기능</h3>
+                    <div class="inline-row">
+                        <label class="camera-select-label">
+                            카메라 선택
+                            <select id="cameraSelect" class="camera-select">
+                                <option value="1" selected>cam1 (1)</option>
+                                <option value="2">cam2 (2)</option>
+                            </select>
+                        </label>
+                    </div>
+                    <div class="inline-row">
+                        <button id="btnStart" onclick="startCamera()">카메라 시작</button>
+                        <button id="btnStop" onclick="stopCamera()">카메라 중지</button>
+                        <button id="btnRoi" onclick="goRoi()">ROI 디버그 페이지</button>
+                        <button id="btnStatus" onclick="loadCameraStatus(true)">상태 조회</button>
+                    </div>
+                    <div id="cameraStatus" role="status" class="camera-status"></div>
+                </div>
+            </section>
 
-    <div style="margin-top:20px; padding:10px; border:1px solid #ccc;">
-        <h3>🔧 개발용 토큰</h3>
-        <button onclick="copyAccessToken()">AccessToken 복사</button>
-        <div id="token-expire"></div>
-        <div id="token-status" style="margin-top:10px; color:green;"></div>
-    </div>
+            <aside class="side-col">
+                <div class="card card--secondary">
+                    <h3>📝 이벤트 로그</h3>
+                    <ul id="eventLog" class="event-log" role="log" aria-label="이벤트 로그"></ul>
+                </div>
 
-    <div class="card">
-        <h3>📷 카메라 기능</h3>
-        <button onclick="startCamera()">카메라 시작</button>
-        <button onclick="stopCamera()">카메라 중지</button>
-        <button onclick="goRoi()">ROI 디버그 페이지</button>
-        <button onclick="loadCameraStatus()">상태 조회</button>
-        <pre id="cameraStatus"></pre>
-    </div>
+                <div class="card card--utility">
+                    <h3>🔧 개발용 토큰</h3>
+                    <button onclick="copyAccessToken()">AccessToken 복사</button>
+                    <div id="token-expire"></div>
+                    <div id="token-status"></div>
+                </div>
 
-    <div class="card">
-        <h3>⚙️ 시스템</h3>
-        <button onclick="logout()">로그아웃</button>
-    </div>
+                <div class="card card--utility">
+                    <h3>⚙️ 시스템</h3>
+                    <div id="secureUserInfo" class="meta-text"></div>
+                </div>
+            </aside>
+        </div>
+    </main>
 
     <script src="/js/index.js"></script>
 </body>

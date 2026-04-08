@@ -171,7 +171,7 @@ namespace FactoryApi.Controllers
             
             if (result == null) return NotFound($"CameraId={cameraId} 카메라를 찾을 수 없습니다.");
 
-            await _hubContext.Clients.All.SendAsync("CameraStatusChanged", result, token);
+            await _hubContext.Clients.Group($"camera-{cameraId}").SendAsync("CameraStatusChanged", result, token);
 
             return Ok(result);
         }
@@ -184,7 +184,7 @@ namespace FactoryApi.Controllers
 
             if (result == null) return NotFound($"CameraID={cameraId} 카메라를 찾을 수 없습니다.");
 
-            await _hubContext.Clients.All.SendAsync("CameraStatusChanged", result, token);
+            await _hubContext.Clients.Group($"camera-{cameraId}").SendAsync("CameraStatusChanged", result, token);
 
             return Ok(result);
         }

@@ -6,6 +6,7 @@ const btnModeLabel = document.getElementById("btnModeLabel");
 const checkRotationEl = document.getElementById("checkRotation");
 const checkLabelEl = document.getElementById("checkLabel");
 const saveStatusEl = document.getElementById("saveStatus");
+const pageTitleEl = document.getElementById("pageTitle");
 
 const bgImage = document.getElementById("bgImage");
 const canvas = document.getElementById("roiCanvas");
@@ -21,6 +22,7 @@ if (!(cameraIdEl instanceof HTMLInputElement) ||
     !(checkRotationEl instanceof HTMLInputElement) ||
     !(checkLabelEl instanceof HTMLInputElement) ||
     !(saveStatusEl instanceof HTMLElement) ||
+    !(pageTitleEl instanceof HTMLElement) ||
     !(bgImage instanceof HTMLImageElement) ||
     !(canvas instanceof HTMLCanvasElement) ||
     !(canvasWrap instanceof HTMLElement) ||
@@ -85,6 +87,22 @@ let labelRoi = { x: 120, y: 100, w: 90, h: 90 };
 if (!ensureLoggedIn()) {
     throw new Error("로그인되지 않은 상태입니다.");
 }
+
+const queryCameraId = Number(new URLSearchParams(window.location.search).get("cameraId"));
+if (Number.isInteger(queryCameraId) && queryCameraId > 0) {
+    cameraIdEl.value = String(queryCameraId);
+}
+
+function updatePageTitle(cameraName) {
+    const currentCameraId = Number(cameraIdEl.value) || 1;
+    const title = cameraName
+        ? `${cameraName} ROI 디버그`
+        : `Camera ${currentCameraId} ROI 디버그`;
+    pageTitleEl.textContent = title;
+    document.title = title;
+}
+
+updatePageTitle();
 
 function setSaveStatus(text, css) {
     saveStatusEl.textContent = text;
@@ -433,6 +451,7 @@ async function loadConfig() {
         }
 
         const data = await res.json();
+        updatePageTitle(data.cameraName);
 
         checkRotationEl.checked = data.checkRotation;
         checkLabelEl.checked = data.checkLabel;
@@ -592,6 +611,7 @@ async function saveRoi() {
 }
 
 btnLoad.addEventListener("click", async () => {
+    updatePageTitle();
     canvasWrap.classList.remove("ready");
     setSaveStatus("설정 불러오는 중...", "saving");
     await loadConfig();

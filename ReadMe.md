@@ -75,6 +75,7 @@ Controller → Application → Infrastructure
 ---
 
 ## Project Structure
+```text
 FactoryApi
 ├─ Controllers
 ├─ Application
@@ -88,7 +89,7 @@ FactoryApi
 
 docs
 └─ Portfolio 자료
-
+'''
 
 
 ---

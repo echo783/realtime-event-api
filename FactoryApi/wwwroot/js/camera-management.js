@@ -105,7 +105,6 @@ function renderCameraRow(camera) {
     tr.appendChild(productTd);
     tr.appendChild(enabledTd);
     tr.appendChild(rtspTd);
-    tr.appendChild(actionsTd);
 
     tr.addEventListener("click", () => loadCameraDetail(camera.cameraId));
     return tr;
@@ -115,7 +114,9 @@ async function enrichCameraList(cameras) {
     const enriched = await Promise.all(cameras.map(async (camera) => {
         if (camera.rtspUrl && String(camera.rtspUrl).trim()) return camera;
         try {
-            const detailRes = await fetch(`/api/camera/${camera.cameraId}`, { headers: authHeaders() });
+            const detailRes = await fetch(`/api/camera/${camera.cameraId}`, {
+                headers: authHeaders()
+            });
             if (!detailRes.ok) return camera;
             const detail = await detailRes.json();
             return { ...camera, rtspUrl: detail.rtspUrl ?? camera.rtspUrl ?? "-" };
@@ -159,14 +160,9 @@ function renderCameraDetail(camera) {
     selectedCameraId = camera.cameraId ?? null;
     detailId.textContent = camera.cameraId ?? "-";
     detailName.textContent = camera.cameraName ?? "-";
-    detailRtsp.textContent = "";
 
-    if (camera.rtspUrl) {
-        const value = document.createElement("div");
-        value.textContent = camera.rtspUrl;
-        detailRtsp.appendChild(value);
-    } else {
-        detailRtsp.textContent = "-";
+    if (detailRtsp) {
+        detailRtsp.textContent = camera.rtspUrl ?? "-";
     }
 
     detailProduct.textContent = camera.productName ?? "-";
@@ -191,7 +187,6 @@ async function loadCameraDetail(id) {
     }
 }
 
-
 async function tryDeleteRequest(url, options) {
     const res = await fetch(url, {
         ...options,
@@ -207,6 +202,7 @@ async function tryDeleteRequest(url, options) {
 
 async function deleteCamera(cameraId, cameraName = "") {
     if (cameraId == null) return;
+
     const targetName = cameraName || `ID ${cameraId}`;
     const confirmed = confirm(`카메라 ${targetName} 을(를) 삭제하시겠습니까?`);
     if (!confirmed) return;
@@ -220,10 +216,12 @@ async function deleteCamera(cameraId, cameraName = "") {
 
     try {
         let lastResponse = null;
+
         for (const candidate of candidates) {
             const result = await tryDeleteRequest(candidate.url, candidate.options);
             if (result.unauthorized) return;
             lastResponse = result;
+
             if (result.ok) {
                 closeDetailModal();
                 clearFormMessage();
@@ -231,16 +229,18 @@ async function deleteCamera(cameraId, cameraName = "") {
                 await loadCameraList();
                 return;
             }
+
             if (![404, 405].includes(result.status)) break;
         }
 
-        let message = "카메라 삭제에 실패했습니다.";
+        let message = "카메라 삭제 API가 아직 구현되지 않았거나 삭제에 실패했습니다.";
         if (lastResponse?.res) {
             try {
                 const text = await lastResponse.res.text();
                 if (text) message = text;
-            } catch {}
+            } catch { }
         }
+
         alert(message);
     } catch (err) {
         console.error(err);
@@ -292,7 +292,7 @@ async function saveCamera(e) {
             throw new Error(text || "카메라 등록 실패");
         }
 
-        const result = await res.json();
+        await res.json();
         setFormMessage("카메라가 등록되었습니다.");
 
         newForm.reset();

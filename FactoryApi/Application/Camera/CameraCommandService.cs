@@ -145,6 +145,28 @@ namespace FactoryApi.Application.Camera
             };
         }
 
+        public async Task<DeleteCameraResult> DeleteCameraAsync(int cameraId, CancellationToken token)
+        {
+            var camera = await _context.CameraConfigs
+                .FirstOrDefaultAsync(x => x.CameraId == cameraId, token);
+
+            if (camera == null)
+            {
+                return new DeleteCameraResult
+                {
+                    Success = false
+                };
+            }
+
+            _context.CameraConfigs.Remove(camera);
+            await _context.SaveChangesAsync(token);
+
+            return new DeleteCameraResult
+            {
+                Success = true,
+                CameraId = cameraId
+            };
+        }
 
     }
 }

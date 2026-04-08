@@ -200,5 +200,20 @@ namespace FactoryApi.Controllers
             return Ok(result);
         }
 
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> Delete(int id, CancellationToken token)
+        {
+            var result = await _commandService.DeleteCameraAsync(id, token);
+
+            if (result == null || !result.Success)
+                return NotFound($"CameraId={id} 카메라를 찾을 수 없습니다.");
+
+            return Ok(new
+            {
+                message = "카메라 삭제 완료",
+                cameraId = id
+            });
+        }
+
     }
 }

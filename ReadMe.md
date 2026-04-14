@@ -1,4 +1,4 @@
-# realtime-event-api
+# Factory Monitoring System
 
 > RTSP 기반 영상 데이터를 실시간 이벤트로 변환하여 API로 제공하는 시스템
 
@@ -125,7 +125,8 @@ FactoryApi/tools/mediamtx/
 다운로드:
 https://drive.google.com/file/d/1MmPli1E5Jfl-LgpTdv6rewxB1XXXY1VW/view?usp=drive_link
 
-
+테스트 URL
+rtsp://admin:chan1324!@cksdnr7979223.iptime.org:8554/Streaming/Channels/101
 
 ※ 실행 전 mediamtx.exe가 해당 경로에 존재해야 정상적으로 카메라 스트림이 동작합니다.
 ---
@@ -133,7 +134,7 @@ https://drive.google.com/file/d/1MmPli1E5Jfl-LgpTdv6rewxB1XXXY1VW/view?usp=drive
 ## Portfolio
 
 - Factory Monitoring Portfolio PDF  
-  docs/Factory Monitoring Portfolio.pdf
+  docs/JeongChanwook_Factory_Monitoring_Portfolio.pdf
 
 
 

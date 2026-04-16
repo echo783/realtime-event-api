@@ -1,10 +1,14 @@
 # realtime-event-api
 
 > RTSP 기반 영상 데이터를 실시간 이벤트로 변환하여 API로 제공하는 시스템
-
+ 
 RTSP 기반 실시간 영상 분석 및 이벤트 처리 시스템입니다.  
 C#, ASP.NET Core, SignalR, OpenCV, MSSQL 기반으로 구성했으며,  
 영상 데이터 → 이벤트 → 상태 → API → 웹 UI 흐름을 중심으로 설계했습니다.
+
+※ 본 시스템은 다음 외부 서비스와 연동됩니다.
+- MediaMTX: RTSP 스트림 중계
+- Realtime Vision Service: OCR 기반 ROI 라벨 검증
 
 ---
 
@@ -28,7 +32,8 @@ RTSP 카메라 스트림을 분석하여
 - SignalR 기반 실시간 상태 전송
 - ROI 설정 및 디버그 기능
 - JWT 기반 인증 및 보호된 API
-
+- Python OCR 서비스 연동 기반 AI 라벨 검증
+- 
 ---
 
 ## Architecture
@@ -39,6 +44,11 @@ Controller → Application → Infrastructure
                Camera Runtime (OpenCV)
                       ↓
                   MSSQL
+
+Application → External Service (HTTP)
+                      ↓
+         Realtime Vision Service (FastAPI + OCR)
+
 ```
 - API 중심 구조로 웹 UI 및 외부 시스템과 확장 가능
 - 런타임 영상 처리와 비즈니스 로직 분리
@@ -129,6 +139,38 @@ https://drive.google.com/file/d/1MmPli1E5Jfl-LgpTdv6rewxB1XXXY1VW/view?usp=drive
 rtsp://admin:chan1324!@cksdnr7979223.iptime.org:8554/Streaming/Channels/101
 
 ※ 실행 전 mediamtx.exe가 해당 경로에 존재해야 정상적으로 카메라 스트림이 동작합니다.
+
+---
+
+## External Dependency (Realtime Vision Service)
+
+ROI 설정 페이지의 **AI 라벨 검증 기능**을 사용하려면  
+별도의 Python OCR 서비스인 **Realtime Vision Service**를 함께 실행해야 합니다.
+
+이유:
+- ROI 영역의 라벨 이미지를 OCR로 분석
+- 의미 있는 텍스트 감지 여부 판단
+- C# API에서 Python 서비스로 HTTP 요청을 보내 검증 결과를 수신
+
+연동 구조:
+- `realtime-event-api` → 운영 API / 웹 UI / 상태 관리
+- `realtime-vision-service` → OCR 기반 ROI 라벨 검증 서비스
+
+Python 서비스 저장소:
+Python 서비스 저장소:
+https://github.com/echo783/realtime-vision-service
+
+기본 실행 주소:
+http://localhost:8000
+
+예시 실행:
+```bash
+uvicorn main:app --host 0.0.0.0 --port 8000
+
+참고:
+Python 서비스가 실행되지 않으면 ROI 화면의 AI 검증 기능은 동작하지 않습니다.
+일반 ROI 조회/저장 기능은 C# 프로젝트만으로 동작합니다.
+
 ---
 
 ## Portfolio

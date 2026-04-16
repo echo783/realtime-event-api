@@ -166,7 +166,7 @@ http://localhost:8000
 예시 실행:
 ```bash
 uvicorn main:app --host 0.0.0.0 --port 8000
-
+```
 참고:
 Python 서비스가 실행되지 않으면 ROI 화면의 AI 검증 기능은 동작하지 않습니다.
 일반 ROI 조회/저장 기능은 C# 프로젝트만으로 동작합니다.

@@ -111,7 +111,14 @@ namespace RealtimeEventApi.Infrastructure.CameraRuntime
                 _sessions.TryAdd(cam.CameraId, runner);
                 await runner.StartAsync(token);
 
+                // 즉시 상태 전파 (Starting/Connecting 상태 반영)
+                await NotifyStatusAsync(cam.CameraId, cam.CameraName, true, token);
+
                 var connected = await WaitForFirstFrameAsync(runner, ManualStartFrameTimeout, token);
+
+                // 최종 상태 전파 (Running 또는 오류 상태 반영)
+                await NotifyStatusAsync(cam.CameraId, cam.CameraName, true, token);
+
                 if (connected)
                     return CameraRuntimeCommandResult.Ok();
 
@@ -177,9 +184,14 @@ namespace RealtimeEventApi.Infrastructure.CameraRuntime
                 if (!_sessions.TryGetValue(cameraId, out var runner))
                     return true;
 
+                _cameraNames.TryGetValue(cameraId, out var cameraName);
+
                 await runner.StopAsync();
                 await runner.DisposeAsync();
                 _sessions.TryRemove(cameraId, out _);
+
+                // 즉시 상태 전파 (Stopped 상태 반영)
+                await NotifyStatusAsync(cameraId, cameraName ?? string.Empty, false, token);
 
                 return true;
             }
@@ -258,15 +270,7 @@ namespace RealtimeEventApi.Infrastructure.CameraRuntime
                                     "Camera session removed. CameraId={CameraId}",
                                     id);
 
-                                await PublishIfChangedAsync(new CameraRunStatusResponse
-                                {
-                                    CameraId = id,
-                                    CameraName = cameraName ?? string.Empty,
-                                    Enabled = false,
-                                    Status = "Stopped",
-                                    Message = "현재 중지 상태입니다.",
-                                    ChangedAt = DateTime.Now
-                                }, stoppingToken);
+                                await NotifyStatusAsync(id, cameraName ?? string.Empty, false, stoppingToken);
                             }
                         }
                     }
@@ -344,17 +348,22 @@ namespace RealtimeEventApi.Infrastructure.CameraRuntime
         {
             foreach (var cam in cameraConfigs)
             {
-                var sessionExists = _sessions.ContainsKey(cam.CameraId);
-                var state = GetDebugState(cam.CameraId);
-                var status = _statusFactory.Create(
-                    cam.CameraId,
-                    cam.CameraName,
-                    enabled: true,
-                    sessionExists,
-                    state);
-
-                await PublishIfChangedAsync(status, token);
+                await NotifyStatusAsync(cam.CameraId, cam.CameraName, true, token);
             }
+        }
+
+        private async Task NotifyStatusAsync(int cameraId, string cameraName, bool enabled, CancellationToken token)
+        {
+            var sessionExists = _sessions.ContainsKey(cameraId);
+            var state = GetDebugState(cameraId);
+            var status = _statusFactory.Create(
+                cameraId,
+                cameraName,
+                enabled,
+                sessionExists,
+                state);
+
+            await PublishIfChangedAsync(status, token);
         }
 
         private async Task PublishIfChangedAsync(CameraRunStatusResponse status, CancellationToken token)

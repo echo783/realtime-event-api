@@ -14,7 +14,6 @@ namespace RealtimeEventApi.Controllers
     public class CameraController : ControllerBase
     {
         private readonly ILogger<CameraController> _logger;
-        private readonly IHubContext<CameraHub> _hubContext;
         private readonly CameraQueryService _queryService;
         private readonly CameraDebugService _debugService;
         private readonly CameraImageService _imageService;
@@ -31,7 +30,6 @@ namespace RealtimeEventApi.Controllers
         CameraImageService imageService,
         CameraDebugService debugService,
         ILogger<CameraController> logger,
-        IHubContext<CameraHub> hubContext,
         CameraRoiValidationService roiValidationService
         )
         {
@@ -42,7 +40,6 @@ namespace RealtimeEventApi.Controllers
             _commandService = commandService;   
             _runtimeCommandService = runtimeCommandService;
             _logger = logger;
-            _hubContext = hubContext;
              _roiValidationService = roiValidationService;
         }
 
@@ -178,8 +175,6 @@ namespace RealtimeEventApi.Controllers
             
             if (result == null) return NotFound($"CameraId={cameraId} 카메라를 찾을 수 없습니다.");
 
-            await _hubContext.Clients.Group($"camera-{cameraId}").SendAsync("CameraStatusChanged", result, token);
-
             return Ok(result);
         }
 
@@ -190,8 +185,6 @@ namespace RealtimeEventApi.Controllers
            var result = await _runtimeCommandService.StopCameraAsync(cameraId, token);
 
             if (result == null) return NotFound($"CameraID={cameraId} 카메라를 찾을 수 없습니다.");
-
-            await _hubContext.Clients.Group($"camera-{cameraId}").SendAsync("CameraStatusChanged", result, token);
 
             return Ok(result);
         }

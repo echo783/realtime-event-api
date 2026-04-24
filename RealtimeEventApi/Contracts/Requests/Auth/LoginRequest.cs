@@ -1,4 +1,4 @@
-﻿namespace FactoryApi.Contracts.Requests.Auth
+﻿namespace RealtimeEventApi.Contracts.Requests.Auth
 {
     public class LoginRequest
     {

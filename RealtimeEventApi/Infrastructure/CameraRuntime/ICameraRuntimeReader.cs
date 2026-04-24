@@ -1,9 +1,9 @@
-﻿namespace FactoryApi.Infrastructure.CameraRuntime
+﻿namespace RealtimeEventApi.Infrastructure.CameraRuntime
 {
     public interface ICameraRuntimeReader
     {
         int GetCameraCount();
-        CameraSessionState? GetDebugState(int  cameraId);
+        CameraSessionSnapshot? GetDebugState(int  cameraId);
 
 
     }

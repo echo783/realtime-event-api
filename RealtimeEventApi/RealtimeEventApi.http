@@ -1,6 +1,6 @@
-@FactoryApi_HostAddress = http://localhost:5186
+@RealtimeEventApi_HostAddress = http://localhost:5186
 
-GET {{FactoryApi_HostAddress}}/weatherforecast/
+GET {{RealtimeEventApi_HostAddress}}/weatherforecast/
 Accept: application/json
 
 ###

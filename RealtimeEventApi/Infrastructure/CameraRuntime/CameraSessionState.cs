@@ -1,6 +1,6 @@
 ﻿using OpenCvSharp;
 
-namespace FactoryApi.Infrastructure.CameraRuntime
+namespace RealtimeEventApi.Infrastructure.CameraRuntime
 {
     public sealed class CameraSessionState : IDisposable
     {
@@ -45,6 +45,8 @@ namespace FactoryApi.Infrastructure.CameraRuntime
         public DateTime LastReconnectAt { get; set; } = DateTime.MinValue;
         public DateTime SessionStartedAt { get; set; } = DateTime.Now;
         public DateTime LastUpdatedAt { get; set; } = DateTime.MinValue;
+        public string LastErrorMessage { get; set; } = string.Empty;
+        public DateTime LastErrorAt { get; set; } = DateTime.MinValue;
 
         public int ConsecutiveReadFails { get; set; }
         public int ConsecutiveSameFrameCount { get; set; }

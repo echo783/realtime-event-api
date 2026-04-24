@@ -1,4 +1,4 @@
-﻿namespace FactoryApi.Contracts.Responses.Monitor
+﻿namespace RealtimeEventApi.Contracts.Responses.Monitor
 {
     public sealed class MonitorProductionResponse
     {

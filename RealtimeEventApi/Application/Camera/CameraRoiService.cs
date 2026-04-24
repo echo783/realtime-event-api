@@ -1,6 +1,6 @@
-﻿using FactoryApi.Contracts.Requests.Camera;
-using FactoryApi.Infrastructure.CameraRuntime;
-using FactoryApi.Infrastructure.Persistence;
+﻿using RealtimeEventApi.Contracts.Requests.Camera;
+using RealtimeEventApi.Infrastructure.CameraRuntime;
+using RealtimeEventApi.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using RealtimeEventApi.Application.Camera.Dtos;
 
@@ -10,16 +10,16 @@ namespace RealtimeEventApi.Application.Camera
     {
         private readonly FactoryDbContext _context;
         private readonly ILogger<CameraRoiService> _logger;
-        private readonly CameraOrchestrator _orchestrator;
+        private readonly ICameraRuntimeController _cameraRuntimeController;
 
         public CameraRoiService(
             FactoryDbContext context,
             ILogger<CameraRoiService> logger,
-            CameraOrchestrator cameraOrchestrator)
+            ICameraRuntimeController cameraRuntimeController)
         {
             _context = context;
             _logger = logger;
-            _orchestrator = cameraOrchestrator;
+            _cameraRuntimeController = cameraRuntimeController;
         }
 
         public async Task<CameraRoiResult> SaveRoiAsync(
@@ -56,8 +56,7 @@ namespace RealtimeEventApi.Application.Camera
 
             await _context.SaveChangesAsync(ct);
 
-            var session = _orchestrator.GetSession(cameraId);
-            session?.ResetAnalysisState();
+            _cameraRuntimeController.RequestAnalysisReset(cameraId);
 
             _logger.LogDebug(
                 "ROI SAVED | CameraId={CameraId} Obj=({OX},{OY},{OW},{OH}) Label=({LX},{LY},{LW},{LH})",

@@ -324,7 +324,7 @@ async function loadCameraStatus(fromButton = false) {
 
 async function startCamera() {
     if (!ensureLoggedIn()) return;
-    setButtonBusy(btnStartEl, true, "시작 중");
+    setButtonBusy(btnStartEl, true, "시작 중...");
 
     try {
         const res = await fetch(`/api/Camera/${cameraId}/start`, {
@@ -333,7 +333,18 @@ async function startCamera() {
         });
 
         if (await handleUnauthorized(res)) return;
-        pushEventLog(res.ok ? `카메라 ${cameraId} 시작 요청 성공` : `카메라 ${cameraId} 시작 실패`);
+        const data = res.ok ? await res.json() : null;
+
+        if (data) {
+            renderCameraStatus(data);
+        }
+
+        const status = (data?.status || "").toString();
+        const succeeded = res.ok && status !== "Error";
+        pushEventLog(succeeded
+            ? `카메라 ${cameraId} 시작 요청: ${status || "OK"}`
+            : `카메라 ${cameraId} 시작 실패${data?.message ? ` - ${data.message}` : ""}`);
+
         await loadCameraOptions();
         await loadCameraStatus();
     } catch (error) {
@@ -341,12 +352,13 @@ async function startCamera() {
         pushEventLog(`카메라 ${cameraId} 시작 오류`);
     } finally {
         setButtonBusy(btnStartEl, false);
+        if (btnStartEl) btnStartEl.textContent = "시작";
     }
 }
 
 async function stopCamera() {
     if (!ensureLoggedIn()) return;
-    setButtonBusy(btnStopEl, true, "중지 중");
+    setButtonBusy(btnStopEl, true, "중지 중...");
 
     try {
         const res = await fetch(`/api/Camera/${cameraId}/stop`, {
@@ -355,7 +367,18 @@ async function stopCamera() {
         });
 
         if (await handleUnauthorized(res)) return;
-        pushEventLog(res.ok ? `카메라 ${cameraId} 중지 요청 성공` : `카메라 ${cameraId} 중지 실패`);
+        const data = res.ok ? await res.json() : null;
+
+        if (data) {
+            renderCameraStatus(data);
+        }
+
+        const status = (data?.status || "").toString();
+        const succeeded = res.ok && status !== "Error";
+        pushEventLog(succeeded
+            ? `카메라 ${cameraId} 중지 요청: ${status || "OK"}`
+            : `카메라 ${cameraId} 중지 실패${data?.message ? ` - ${data.message}` : ""}`);
+
         await loadCameraOptions();
         await loadCameraStatus();
     } catch (error) {
@@ -363,6 +386,7 @@ async function stopCamera() {
         pushEventLog(`카메라 ${cameraId} 중지 오류`);
     } finally {
         setButtonBusy(btnStopEl, false);
+        if (btnStopEl) btnStopEl.textContent = "중지";
     }
 }
 

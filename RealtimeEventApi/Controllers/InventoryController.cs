@@ -1,8 +1,8 @@
 ﻿using Dapper;
 using Microsoft.AspNetCore.Mvc;
-using FactoryApi.Infrastructure.Persistence;
+using RealtimeEventApi.Infrastructure.Persistence;
 
-namespace FactoryApi.Controllers
+namespace RealtimeEventApi.Controllers
 {
     [ApiController]
     [Route("api/inventory")]

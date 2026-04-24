@@ -1,8 +1,8 @@
-﻿using FactoryApi.Contracts.Requests.Delivery;
-using FactoryApi.Infrastructure.Persistence;
+﻿using RealtimeEventApi.Contracts.Requests.Delivery;
+using RealtimeEventApi.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FactoryApi.Controllers
+namespace RealtimeEventApi.Controllers
 {
     [ApiController]
     [Route("api/delivery")]

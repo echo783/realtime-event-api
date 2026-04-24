@@ -1,7 +1,5 @@
-using FactoryApi.Application.Ai;
-using FactoryApi.Hubs;
-using FactoryApi.Infrastructure.Ai;
-using FactoryApi.Infrastructure.DependencyInjection;
+using RealtimeEventApi.Hubs;
+using RealtimeEventApi.Infrastructure.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,7 +14,9 @@ builder.Services.AddCameraRuntime();
 builder.Services.AddMonitor();
 
 //python vision client 설정
-builder.Services.AddAiServices(builder.Configuration);
+builder.Services.AddAipyServices(builder.Configuration);
+//llm 설정
+builder.Services.AddAillmServices(builder.Configuration);
 
 builder.Services.AddMediaMtx(builder.Configuration);
 

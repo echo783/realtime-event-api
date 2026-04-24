@@ -1,9 +1,10 @@
-﻿using FactoryApi.Infrastructure.Persistence;
+﻿using RealtimeEventApi.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using RealtimeEventApi.Contracts.Responses.Camera;
 
-namespace FactoryApi.Infrastructure.CameraRuntime
+namespace RealtimeEventApi.Infrastructure.CameraRuntime
 {
-    public sealed class CameraOrchestrator : BackgroundService,ICameraRuntimeReader
+    public sealed class CameraOrchestrator : BackgroundService, ICameraRuntimeReader, ICameraRuntimeController
     {
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<CameraOrchestrator> _logger;
@@ -11,8 +12,13 @@ namespace FactoryApi.Infrastructure.CameraRuntime
         private readonly SnapshotFileService _snapshotFileService;
         private readonly ProductionPersistenceService _persistenceService;
         private readonly ILabelDetector _labelDetector;
-        private readonly Dictionary<int, CameraSessionRunner> _sessions = new();
+        private readonly ICameraStatusPublisher _statusPublisher;
+        private readonly CameraRuntimeStatusFactory _statusFactory;
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<int, CameraSessionRunner> _sessions = new();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<int, string> _cameraNames = new();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<int, string> _lastStatusSignatures = new();
         private readonly SemaphoreSlim _sessionLock = new(1, 1);
+        private static readonly TimeSpan ManualStartFrameTimeout = TimeSpan.FromSeconds(6);
 
 
         public CameraOrchestrator(
@@ -21,7 +27,9 @@ namespace FactoryApi.Infrastructure.CameraRuntime
             ILoggerFactory loggerFactory,
             SnapshotFileService snapshotFileService,
             ProductionPersistenceService persistenceService,
-            ILabelDetector labelDetector)
+            ILabelDetector labelDetector,
+            ICameraStatusPublisher statusPublisher,
+            CameraRuntimeStatusFactory statusFactory)
         {
             _scopeFactory = scopeFactory;
             _logger = logger;
@@ -29,9 +37,11 @@ namespace FactoryApi.Infrastructure.CameraRuntime
             _snapshotFileService = snapshotFileService;
             _persistenceService = persistenceService;
             _labelDetector = labelDetector;
+            _statusPublisher = statusPublisher;
+            _statusFactory = statusFactory;
         }
 
-        public CameraSessionState? GetDebugState(int cameraId)
+        public CameraSessionSnapshot? GetDebugState(int cameraId)
         {
             if (_sessions.TryGetValue(cameraId, out var session))
                 return session.GetDebugState();
@@ -44,13 +54,31 @@ namespace FactoryApi.Infrastructure.CameraRuntime
             return _sessions.ContainsKey(cameraId);
         }
 
-        public async Task<bool> StartCameraAsync(int cameraId, CancellationToken token = default)
+        public bool RequestAnalysisReset(int cameraId)
+        {
+            if (!_sessions.TryGetValue(cameraId, out var session))
+                return false;
+
+            session.ResetAnalysisState();
+            return true;
+        }
+
+        public async Task<CameraRuntimeCommandResult> StartCameraAsync(int cameraId, CancellationToken token = default)
         {
             await _sessionLock.WaitAsync(token);
             try
             {
-                if (_sessions.ContainsKey(cameraId))
-                    return true;
+                if (_sessions.TryGetValue(cameraId, out var existingRunner))
+                {
+                    var existingState = existingRunner.GetDebugState();
+                    return HasSuccessfulFrame(existingState)
+                        ? CameraRuntimeCommandResult.Ok()
+                        : CameraRuntimeCommandResult.Fail(
+                            string.IsNullOrWhiteSpace(existingState.LastErrorMessage)
+                                ? "세션은 존재하지만 아직 카메라 프레임을 수신하지 못했습니다."
+                                : existingState.LastErrorMessage,
+                            ToNullableTime(existingState.LastErrorAt));
+                }
 
                 using var scope = _scopeFactory.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<FactoryDbContext>();
@@ -67,7 +95,9 @@ namespace FactoryApi.Infrastructure.CameraRuntime
                     .FirstOrDefaultAsync(token);
 
                 if (cam == null)
-                    return false;
+                    return CameraRuntimeCommandResult.Fail($"CameraId={cameraId} 카메라를 찾을 수 없습니다.");
+
+                _cameraNames[cam.CameraId] = cam.CameraName;
 
                 var runner = new CameraSessionRunner(
                     _loggerFactory.CreateLogger<CameraSessionRunner>(),
@@ -78,20 +108,65 @@ namespace FactoryApi.Infrastructure.CameraRuntime
                     cam.RtspUrl,
                     _labelDetector);
 
-                _sessions.Add(cam.CameraId, runner);
+                _sessions.TryAdd(cam.CameraId, runner);
                 await runner.StartAsync(token);
 
-                return true;
+                var connected = await WaitForFirstFrameAsync(runner, ManualStartFrameTimeout, token);
+                if (connected)
+                    return CameraRuntimeCommandResult.Ok();
+
+                var failedState = runner.GetDebugState();
+                var errorMessage = string.IsNullOrWhiteSpace(failedState.LastErrorMessage)
+                    ? "카메라 시작 실패: 첫 프레임을 제한 시간 안에 수신하지 못했습니다."
+                    : failedState.LastErrorMessage;
+                var lastErrorAt = ToNullableTime(failedState.LastErrorAt);
+
+                await runner.StopAsync();
+                await runner.DisposeAsync();
+                _sessions.TryRemove(cam.CameraId, out _);
+                _cameraNames.TryRemove(cam.CameraId, out _);
+
+                _logger.LogWarning(
+                    "Manual camera start failed before first frame. CameraId={CameraId}, CameraName={CameraName}",
+                    cam.CameraId,
+                    cam.CameraName);
+
+                return CameraRuntimeCommandResult.Fail(errorMessage, lastErrorAt);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "StartCameraAsync error. CameraId={CameraId}", cameraId);
-                return false;
+                return CameraRuntimeCommandResult.Fail($"카메라 시작 중 예외 발생: {ex.Message}");
             }
             finally
             {
                 _sessionLock.Release();
             }
+        }
+
+        private static async Task<bool> WaitForFirstFrameAsync(
+            CameraSessionRunner runner,
+            TimeSpan timeout,
+            CancellationToken token)
+        {
+            var deadline = DateTime.UtcNow + timeout;
+
+            while (DateTime.UtcNow < deadline)
+            {
+                token.ThrowIfCancellationRequested();
+
+                if (HasSuccessfulFrame(runner.GetDebugState()))
+                    return true;
+
+                await Task.Delay(200, token);
+            }
+
+            return false;
+        }
+
+        private static bool HasSuccessfulFrame(CameraSessionSnapshot state)
+        {
+            return state.LastSuccessfulReadAt != DateTime.MinValue;
         }
 
         public async Task<bool> StopCameraAsync(int cameraId, CancellationToken token = default)
@@ -104,7 +179,7 @@ namespace FactoryApi.Infrastructure.CameraRuntime
 
                 await runner.StopAsync();
                 await runner.DisposeAsync();
-                _sessions.Remove(cameraId);
+                _sessions.TryRemove(cameraId, out _);
 
                 return true;
             }
@@ -140,6 +215,8 @@ namespace FactoryApi.Infrastructure.CameraRuntime
                     {
                         foreach (var cam in cameraConfigs)
                         {
+                            _cameraNames[cam.CameraId] = cam.CameraName;
+
                             if (_sessions.ContainsKey(cam.CameraId))
                                 continue;
 
@@ -152,7 +229,7 @@ namespace FactoryApi.Infrastructure.CameraRuntime
                                 cam.RtspUrl,
                                 _labelDetector);
 
-                            _sessions.Add(cam.CameraId, runner);
+                            _sessions.TryAdd(cam.CameraId, runner);
                             await runner.StartAsync(stoppingToken);
 
                             _logger.LogDebug(
@@ -170,13 +247,26 @@ namespace FactoryApi.Infrastructure.CameraRuntime
                         {
                             if (_sessions.TryGetValue(id, out var runner))
                             {
+                                _cameraNames.TryGetValue(id, out var cameraName);
+
                                 await runner.StopAsync();
                                 await runner.DisposeAsync();
-                                _sessions.Remove(id);
+                                _sessions.TryRemove(id, out _);
+                                _cameraNames.TryRemove(id, out _);
 
                                 _logger.LogInformation(
                                     "Camera session removed. CameraId={CameraId}",
                                     id);
+
+                                await PublishIfChangedAsync(new CameraRunStatusResponse
+                                {
+                                    CameraId = id,
+                                    CameraName = cameraName ?? string.Empty,
+                                    Enabled = false,
+                                    Status = "Stopped",
+                                    Message = "현재 중지 상태입니다.",
+                                    ChangedAt = DateTime.Now
+                                }, stoppingToken);
                             }
                         }
                     }
@@ -184,6 +274,8 @@ namespace FactoryApi.Infrastructure.CameraRuntime
                     {
                         _sessionLock.Release();
                     }
+
+                    await PublishCurrentStatusesAsync(cameraConfigs, stoppingToken);
                 }
                 catch (OperationCanceledException)
                 {
@@ -200,20 +292,31 @@ namespace FactoryApi.Infrastructure.CameraRuntime
 
         public override async Task StopAsync(CancellationToken cancellationToken)
         {
-            foreach (var pair in _sessions.ToList())
+            await _sessionLock.WaitAsync(cancellationToken);
+            try
             {
-                try
+                foreach (var pair in _sessions.ToList())
                 {
-                    await pair.Value.StopAsync();
-                    await pair.Value.DisposeAsync();
+                    try
+                    {
+                        await pair.Value.StopAsync();
+                        await pair.Value.DisposeAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, "Error while stopping session. CameraId={CameraId}", pair.Key);
+                    }
                 }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error while stopping session. CameraId={CameraId}", pair.Key);
-                }
+
+                _sessions.Clear();
+                _cameraNames.Clear();
+                _lastStatusSignatures.Clear();
+            }
+            finally
+            {
+                _sessionLock.Release();
             }
 
-            _sessions.Clear();
             await base.StopAsync(cancellationToken);
         }
 
@@ -234,11 +337,44 @@ namespace FactoryApi.Infrastructure.CameraRuntime
                 })
                 .ToListAsync(token);
         }
-        public CameraSessionRunner? GetSession(int cameraId)
+
+        private async Task PublishCurrentStatusesAsync(
+            IReadOnlyCollection<CameraRuntimeConfig> cameraConfigs,
+            CancellationToken token)
         {
-            _sessions.TryGetValue(cameraId, out var session);
-            return session;
+            foreach (var cam in cameraConfigs)
+            {
+                var sessionExists = _sessions.ContainsKey(cam.CameraId);
+                var state = GetDebugState(cam.CameraId);
+                var status = _statusFactory.Create(
+                    cam.CameraId,
+                    cam.CameraName,
+                    enabled: true,
+                    sessionExists,
+                    state);
+
+                await PublishIfChangedAsync(status, token);
+            }
         }
+
+        private async Task PublishIfChangedAsync(CameraRunStatusResponse status, CancellationToken token)
+        {
+            var signature = CameraRuntimeStatusFactory.BuildSignature(status);
+            if (_lastStatusSignatures.TryGetValue(status.CameraId, out var previous) &&
+                previous == signature)
+            {
+                return;
+            }
+
+            _lastStatusSignatures[status.CameraId] = signature;
+            await _statusPublisher.PublishAsync(status, token);
+        }
+
+        private static DateTime? ToNullableTime(DateTime value)
+        {
+            return value == DateTime.MinValue ? null : value;
+        }
+
         private sealed class CameraRuntimeConfig
         {
             public int CameraId { get; set; }

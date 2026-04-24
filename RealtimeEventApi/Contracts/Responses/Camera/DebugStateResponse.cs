@@ -1,4 +1,4 @@
-﻿namespace FactoryApi.Contracts.Responses.Camera
+﻿namespace RealtimeEventApi.Contracts.Responses.Camera
 {
     public class DebugStateResponse
     {
@@ -27,6 +27,8 @@
         public DateTime LastReconnectAt { get; set; }
         public DateTime SessionStartedAt { get; set; }
         public DateTime LastUpdatedAt { get; set; }
+        public string LastErrorMessage { get; set; } = string.Empty;
+        public DateTime LastErrorAt { get; set; }
 
         public int ConsecutiveReadFails { get; set; }
         public int ConsecutiveSameFrameCount { get; set; }

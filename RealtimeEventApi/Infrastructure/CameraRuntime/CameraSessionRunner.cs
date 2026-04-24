@@ -1,8 +1,8 @@
-﻿using FactoryApi.Infrastructure.Persistence;
-using FactoryApi.Models;
+﻿using RealtimeEventApi.Infrastructure.Persistence;
+using RealtimeEventApi.Models;
 using OpenCvSharp;
 
-namespace FactoryApi.Infrastructure.CameraRuntime
+namespace RealtimeEventApi.Infrastructure.CameraRuntime
 {
     public sealed class CameraSessionRunner : IAsyncDisposable
     {
@@ -15,10 +15,12 @@ namespace FactoryApi.Infrastructure.CameraRuntime
 
         private readonly LatestFrameBuffer _buffer = new();
         private readonly CameraSessionState _state = new();
+        private readonly object _stateLock = new();
         private readonly WorkerStyleDetectionEngine _engine;
 
         private CancellationTokenSource? _cts;
         private Task? _readTask;
+        private int _analysisResetRequested;
 
         private CameraConfig? _cameraConfig;
         private DateTime _lastConfigLoadedAt = DateTime.MinValue;
@@ -53,7 +55,10 @@ namespace FactoryApi.Infrastructure.CameraRuntime
 
             _cts = CancellationTokenSource.CreateLinkedTokenSource(outerToken);
 
-            _state.SessionStartedAt = DateTime.Now;
+            lock (_stateLock)
+            {
+                _state.SessionStartedAt = DateTime.Now;
+            }
             _readTask = Task.Run(() => ReadLoopAsync(_cts.Token), _cts.Token);
 
             _logger.LogInformation(
@@ -105,13 +110,52 @@ namespace FactoryApi.Infrastructure.CameraRuntime
 
         private void ResetAnalysisStateForReconnect()
         {
-            _state.ResetAnalysisFrames();
-            _state.ConsecutiveReadFails = 0;
-            _state.ConsecutiveSameFrameCount = 0;
-            _state.LastFrameSignature = 0;
-            _state.StreamJustReconnected = true;
-            _state.LastReconnectAt = DateTime.Now;
-            _state.SessionStartedAt = DateTime.Now;
+            lock (_stateLock)
+            {
+                _state.ResetAnalysisFrames();
+                _analysisResetRequested = 0;
+                _state.ConsecutiveReadFails = 0;
+                _state.ConsecutiveSameFrameCount = 0;
+                _state.LastFrameSignature = 0;
+                _state.StreamJustReconnected = true;
+                _state.LastReconnectAt = DateTime.Now;
+                _state.SessionStartedAt = DateTime.Now;
+            }
+        }
+
+        private void ApplyPendingAnalysisReset()
+        {
+            if (Interlocked.Exchange(ref _analysisResetRequested, 0) == 0)
+                return;
+
+            lock (_stateLock)
+            {
+                _state.ResetAnalysisFrames();
+                _cameraConfig = null;
+                _lastConfigLoadedAt = DateTime.MinValue;
+            }
+
+            _logger.LogInformation(
+                "Camera analysis state reset applied. CameraId={CameraId}",
+                _cameraId);
+        }
+
+        private void SetStreamError(string message)
+        {
+            lock (_stateLock)
+            {
+                _state.LastErrorMessage = message;
+                _state.LastErrorAt = DateTime.Now;
+            }
+        }
+
+        private void ClearStreamError()
+        {
+            lock (_stateLock)
+            {
+                _state.LastErrorMessage = string.Empty;
+                _state.LastErrorAt = DateTime.MinValue;
+            }
         }
 
         private static ulong ComputeFrameSignature(Mat frame)
@@ -154,6 +198,8 @@ namespace FactoryApi.Infrastructure.CameraRuntime
 
                     if (!cap.Open(openUrl, VideoCaptureAPIs.FFMPEG) || !cap.IsOpened())
                     {
+                        var message = "스트림을 열지 못했습니다. RTSP URL, 네트워크, 포트포워딩을 확인하세요.";
+                        SetStreamError(message);
                         _logger.LogWarning("Failed to open stream. CameraId={CameraId}, Url={Url}", _cameraId, openUrl);
                         await Task.Delay(1500, token);
                         continue;
@@ -179,9 +225,14 @@ namespace FactoryApi.Infrastructure.CameraRuntime
 
                         if (!ok || frame.Empty())
                         {
-                            _state.ConsecutiveReadFails++;
+                            int consecutiveReadFails;
+                            lock (_stateLock)
+                            {
+                                _state.ConsecutiveReadFails++;
+                                consecutiveReadFails = _state.ConsecutiveReadFails;
+                            }
 
-                            if (_state.ConsecutiveReadFails < 15)
+                            if (consecutiveReadFails < 15)
                             {
                                 await Task.Delay(50, token);
                                 continue;
@@ -190,38 +241,52 @@ namespace FactoryApi.Infrastructure.CameraRuntime
                             _logger.LogWarning(
                                 "Read failed repeatedly. Reconnecting... CameraId={CameraId}, FailCount={FailCount}",
                                 _cameraId,
-                                _state.ConsecutiveReadFails);
+                                consecutiveReadFails);
+                            SetStreamError($"프레임 읽기 실패가 {consecutiveReadFails}회 연속 발생했습니다. 스트림 재연결을 시도합니다.");
 
                             break;
                         }
 
-                        _state.ConsecutiveReadFails = 0;
-                        _state.LastSuccessfulReadAt = DateTime.Now;
-                        _state.LastFrameAt = DateTime.Now;
-
                         ulong sig = ComputeFrameSignature(frame);
-                        if (sig == _state.LastFrameSignature)
+                        int consecutiveSameFrameCount;
+                        lock (_stateLock)
                         {
-                            _state.ConsecutiveSameFrameCount++;
-                        }
-                        else
-                        {
-                            _state.ConsecutiveSameFrameCount = 0;
-                            _state.LastFrameSignature = sig;
-                        }
+                            _state.ConsecutiveReadFails = 0;
+                            _state.LastSuccessfulReadAt = DateTime.Now;
+                            _state.LastFrameAt = DateTime.Now;
 
-                        if (_state.ConsecutiveSameFrameCount >= 50)
+                            if (sig == _state.LastFrameSignature)
+                            {
+                                _state.ConsecutiveSameFrameCount++;
+                            }
+                            else
+                            {
+                                _state.ConsecutiveSameFrameCount = 0;
+                                _state.LastFrameSignature = sig;
+                            }
+
+                            consecutiveSameFrameCount = _state.ConsecutiveSameFrameCount;
+                        }
+                        ClearStreamError();
+
+                        if (consecutiveSameFrameCount >= 50)
                         {
                             _logger.LogWarning(
                                 "Stale frame detected. Reconnecting... CameraId={CameraId}, SameFrameCount={SameFrameCount}",
                                 _cameraId,
-                                _state.ConsecutiveSameFrameCount);
+                                consecutiveSameFrameCount);
+                            SetStreamError($"동일한 프레임이 {consecutiveSameFrameCount}회 연속 감지되었습니다. 스트림 재연결을 시도합니다.");
 
                             break;
                         }
 
                         _buffer.Set(frame);
-                        _state.StreamJustReconnected = false;
+                        lock (_stateLock)
+                        {
+                            _state.StreamJustReconnected = false;
+                        }
+
+                        ApplyPendingAnalysisReset();
 
                         using var analyzeFrame = frame.Clone();
                         await AnalyzeFrameAsync(analyzeFrame, DateTime.Now, token);
@@ -235,6 +300,7 @@ namespace FactoryApi.Infrastructure.CameraRuntime
                 }
                 catch (Exception ex)
                 {
+                    SetStreamError($"ReadLoop 예외 발생: {ex.Message}");
                     _logger.LogError(ex, "ReadLoop error. CameraId={CameraId}", _cameraId);
                     await Task.Delay(1500, token);
                 }
@@ -258,10 +324,20 @@ namespace FactoryApi.Infrastructure.CameraRuntime
         {
             try
             {
-                if ((DateTime.Now - _state.LastLatestSavedAt).TotalMilliseconds >= 1000)
+                var now = DateTime.Now;
+                bool shouldSaveLatest;
+                lock (_stateLock)
+                {
+                    shouldSaveLatest = (now - _state.LastLatestSavedAt).TotalMilliseconds >= 1000;
+                }
+
+                if (shouldSaveLatest)
                 {
                     await _snapshotFileService.SaveLatestAsync(_cameraId, frame, token);
-                    _state.LastLatestSavedAt = DateTime.Now;
+                    lock (_stateLock)
+                    {
+                        _state.LastLatestSavedAt = DateTime.Now;
+                    }
                 }
 
                 var config = await EnsureCameraConfigAsync(token);
@@ -284,12 +360,16 @@ namespace FactoryApi.Infrastructure.CameraRuntime
                     return;
                 }
 
-                DetectionResult result = _engine.Analyze(
-                    frame,
-                    objectRect,
-                    labelRect,
-                    config.CheckRotation,
-                    config.CheckLabel);
+                DetectionResult result;
+                lock (_stateLock)
+                {
+                    result = _engine.Analyze(
+                        frame,
+                        objectRect,
+                        labelRect,
+                        config.CheckRotation,
+                        config.CheckLabel);
+                }
 
                 if (!result.CountAdded)
                     return;
@@ -301,7 +381,7 @@ namespace FactoryApi.Infrastructure.CameraRuntime
                     _cameraId,
                     config.ProductName,
                     capturedAt,
-                    _state.ProductionCount,
+                    result.ProductionCount,
                     snapshotPath,
                     token);
 
@@ -309,7 +389,7 @@ namespace FactoryApi.Infrastructure.CameraRuntime
                     "COUNT HIT! CameraId={CameraId}, ProductName={ProductName}, Count={Count}",
                     _cameraId,
                     config.ProductName,
-                    _state.ProductionCount);
+                    result.ProductionCount);
             }
             catch (Exception ex)
             {
@@ -318,14 +398,54 @@ namespace FactoryApi.Infrastructure.CameraRuntime
         }
         public void ResetAnalysisState()
         {
-            _state.ResetAnalysisFrames();
+            Interlocked.Exchange(ref _analysisResetRequested, 1);
         }
-        public CameraSessionState GetDebugState() => _state;
+        public CameraSessionSnapshot GetDebugState()
+        {
+            lock (_stateLock)
+            {
+                return new CameraSessionSnapshot
+                {
+                    LastLatestSavedAt = _state.LastLatestSavedAt,
+                    LastProductionAt = _state.LastProductionAt,
+                    RotationStartTime = _state.RotationStartTime,
+                    RotationActive = _state.RotationActive,
+                    LabelInZone = _state.LabelInZone,
+                    CountedInCurrentRotation = _state.CountedInCurrentRotation,
+                    LastRotationChangeValue = _state.LastRotationChangeValue,
+                    LastMotionRatio = _state.LastMotionRatio,
+                    LastLabelChangeValue = _state.LastLabelChangeValue,
+                    LastStarted = _state.LastStarted,
+                    LastEnded = _state.LastEnded,
+                    LastLabelEnter = _state.LastLabelEnter,
+                    LastDetectorFound = _state.LastDetectorFound,
+                    LastDetectorConfidence = _state.LastDetectorConfidence,
+                    LabelDetectedStreak = _state.LabelDetectedStreak,
+                    LabelOffStreak = _state.LabelOffStreak,
+                    ProductionCount = _state.ProductionCount,
+                    LastFrameAt = _state.LastFrameAt,
+                    LastSuccessfulReadAt = _state.LastSuccessfulReadAt,
+                    LastReconnectAt = _state.LastReconnectAt,
+                    SessionStartedAt = _state.SessionStartedAt,
+                    LastUpdatedAt = _state.LastUpdatedAt,
+                    LastErrorMessage = _state.LastErrorMessage,
+                    LastErrorAt = _state.LastErrorAt,
+                    ConsecutiveReadFails = _state.ConsecutiveReadFails,
+                    ConsecutiveSameFrameCount = _state.ConsecutiveSameFrameCount,
+                    StreamJustReconnected = _state.StreamJustReconnected,
+                    RotationDetectedStreak = _state.RotationDetectedStreak,
+                    RotationOffStreak = _state.RotationOffStreak
+                };
+            }
+        }
 
         public async ValueTask DisposeAsync()
         {
             await StopAsync();
-            _state.Dispose();
+            lock (_stateLock)
+            {
+                _state.Dispose();
+            }
             _buffer.Dispose();
         }
     }

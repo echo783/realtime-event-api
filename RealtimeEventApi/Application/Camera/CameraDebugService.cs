@@ -1,31 +1,25 @@
-﻿using FactoryApi.Contracts.Responses.Camera;
-using FactoryApi.Infrastructure.CameraRuntime;
-using FactoryApi.Infrastructure.Persistence;
+﻿using RealtimeEventApi.Contracts.Responses.Camera;
+using RealtimeEventApi.Infrastructure.CameraRuntime;
+using RealtimeEventApi.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using RealtimeEventApi.Application.Camera.Dtos;
 
-namespace FactoryApi.Application.Camera
+namespace RealtimeEventApi.Application.Camera
 {
     public class CameraDebugService
     {
-        private readonly CameraOrchestrator _cameraOrchestrator;
+        private readonly ICameraRuntimeReader _cameraRuntimeReader;
         private readonly FactoryDbContext _context;
 
-        public CameraDebugService(CameraOrchestrator cameraOrchestrator,  FactoryDbContext context)
+        public CameraDebugService(ICameraRuntimeReader cameraRuntimeReader,  FactoryDbContext context)
         {
-            _cameraOrchestrator = cameraOrchestrator;
+            _cameraRuntimeReader = cameraRuntimeReader;
             _context = context;
         }
 
         public DebugStateResponse? GetDebugState(int cameraId)
         {
-            var session = _cameraOrchestrator.GetSession(cameraId);
-            if (session == null)
-            {
-                return null;
-            }
-          
-            var state = session.GetDebugState();
+            var state = _cameraRuntimeReader.GetDebugState(cameraId);
             if (state == null) {
                 return null;
             }
@@ -51,6 +45,8 @@ namespace FactoryApi.Application.Camera
                 LastReconnectAt = state.LastReconnectAt,
                 SessionStartedAt = state.SessionStartedAt,
                 LastUpdatedAt = state.LastUpdatedAt,
+                LastErrorMessage = state.LastErrorMessage,
+                LastErrorAt = state.LastErrorAt,
                 ConsecutiveReadFails = state.ConsecutiveReadFails,
                 ConsecutiveSameFrameCount = state.ConsecutiveSameFrameCount,
                 StreamJustReconnected = state.StreamJustReconnected,

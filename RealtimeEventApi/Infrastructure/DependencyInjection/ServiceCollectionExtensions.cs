@@ -1,18 +1,19 @@
-﻿using FactoryApi.Application.Ai;
-using FactoryApi.Application.Camera;
-using FactoryApi.Application.Monitor;
-using FactoryApi.Infrastructure.Ai;
-using FactoryApi.Infrastructure.Auth;
-using FactoryApi.Infrastructure.CameraRuntime;
-using FactoryApi.Infrastructure.MediaMtx;
-using FactoryApi.Infrastructure.Persistence;
+﻿using RealtimeEventApi.Application.Camera;
+using RealtimeEventApi.Application.Monitor;
+using RealtimeEventApi.Infrastructure.Auth;
+using RealtimeEventApi.Infrastructure.CameraRuntime;
+using RealtimeEventApi.Infrastructure.MediaMtx;
+using RealtimeEventApi.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using RealtimeEventApi.Application.Camera;
+using RealtimeEventApi.Application.Ai.Llm;
+using RealtimeEventApi.Application.Ai.Vision;
+using RealtimeEventApi.Infrastructure.Ai.Llm;
+using RealtimeEventApi.Infrastructure.Ai.Vision;
 using System.Text;
 
-namespace FactoryApi.Infrastructure.DependencyInjection
+namespace RealtimeEventApi.Infrastructure.DependencyInjection
 {
     public static class ServiceCollectionExtensions
     {
@@ -64,6 +65,7 @@ namespace FactoryApi.Infrastructure.DependencyInjection
             services.AddScoped<CameraImageService>();
             services.AddScoped<CameraRoiService>();
             services.AddScoped<CameraCommandService>();
+            services.AddScoped<CameraRuntimeCommandService>();
 
             return services;
         }
@@ -72,8 +74,12 @@ namespace FactoryApi.Infrastructure.DependencyInjection
         {
             services.AddSingleton<SnapshotFileService>();
             services.AddSingleton<ProductionPersistenceService>();
+            services.AddSingleton<CameraRuntimeStatusFactory>();
             services.AddSingleton<CameraOrchestrator>();
             services.AddSingleton<ICameraRuntimeReader>(sp => sp.GetRequiredService<CameraOrchestrator>());
+            services.AddSingleton<ICameraRuntimeController>(sp => sp.GetRequiredService<CameraOrchestrator>());
+            services.AddSingleton<ICameraStatusPublisher, SignalRCameraStatusPublisher>();
+            services.AddHostedService(sp => sp.GetRequiredService<CameraOrchestrator>());
             services.AddSingleton<ILabelDetector, DummyLabelDetector>();
 
             return services;
@@ -95,7 +101,7 @@ namespace FactoryApi.Infrastructure.DependencyInjection
             return services;
         }
 
-        public static IServiceCollection AddAiServices(
+        public static IServiceCollection AddAipyServices(
             this IServiceCollection services,
             IConfiguration configuration)
         {
@@ -109,6 +115,14 @@ namespace FactoryApi.Infrastructure.DependencyInjection
             });
 
             services.AddScoped<CameraRoiValidationService>();
+
+            return services;
+        }
+
+        public static IServiceCollection AddAillmServices(this IServiceCollection services, IConfiguration config)
+        {
+            services.AddScoped<IOperationAnalysisService, OperationAnalysisService>();
+            services.AddScoped<ILlmClient, FakeLlmClient>();
 
             return services;
         }

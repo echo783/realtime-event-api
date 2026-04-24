@@ -1,4 +1,4 @@
-﻿namespace FactoryApi.Contracts.Responses.Delivery
+﻿namespace RealtimeEventApi.Contracts.Responses.Delivery
 {
     public class DeliveryListResponse
     {

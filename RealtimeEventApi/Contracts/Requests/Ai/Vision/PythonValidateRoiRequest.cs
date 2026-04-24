@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace FactoryApi.Application.Ai
+namespace RealtimeEventApi.Contracts.Requests.Ai.Vision
 {
     public sealed class PythonValidateRoiRequest
     {

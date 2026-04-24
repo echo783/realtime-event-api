@@ -1,4 +1,4 @@
-﻿namespace FactoryApi.Infrastructure.MediaMtx
+﻿namespace RealtimeEventApi.Infrastructure.MediaMtx
 {
     public class MediaMtxOptions
     {

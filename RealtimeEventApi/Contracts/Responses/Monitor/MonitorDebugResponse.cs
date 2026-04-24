@@ -1,4 +1,4 @@
-﻿namespace FactoryApi.Contracts.Responses.Monitor
+﻿namespace RealtimeEventApi.Contracts.Responses.Monitor
 {
     public sealed class MonitorDebugResponse
     {
@@ -16,5 +16,8 @@
         public int ProductionCount { get; set; }
 
         public DateTime? LastProductionAt { get; set; }
+        public DateTime? LastSuccessfulReadAt { get; set; }
+        public DateTime? LastErrorAt { get; set; }
+        public string LastErrorMessage { get; set; } = string.Empty;
     }
 }

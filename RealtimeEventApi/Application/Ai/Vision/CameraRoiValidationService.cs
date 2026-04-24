@@ -1,11 +1,13 @@
-﻿using FactoryApi.Infrastructure.Ai;
-using FactoryApi.Infrastructure.Persistence;
+﻿using RealtimeEventApi.Application.Ai.Vision;
+using RealtimeEventApi.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
+using RealtimeEventApi.Infrastructure.Ai.Vision;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using RealtimeEventApi.Contracts.Requests.Ai.Vision;
 
-namespace FactoryApi.Application.Ai
+namespace RealtimeEventApi.Application.Ai.Vision
 {
     public sealed class CameraRoiValidationService
     {

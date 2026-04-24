@@ -39,8 +39,13 @@ body {
 
 .roi-top-card {
     display: grid;
-    gap: 18px;
+    gap: 12px;
+    padding: 14px 16px;
 }
+
+    .roi-top-card .card-head {
+        margin-bottom: 6px;
+    }
 
 .save-status {
     min-width: auto;
@@ -80,18 +85,12 @@ body {
     }
 
 .toolbar-row {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    width: 100%;
-    flex-wrap: wrap;
+    gap: 8px;
+    align-items: flex-end;
 }
 
 .field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    min-width: 140px;
+    gap: 4px;
 }
 
 .field-label {
@@ -101,31 +100,17 @@ body {
 }
 
 .tool-controls {
-    display: flex;
-    gap: 12px;
-    align-items: center;
-    justify-content: flex-end;
-    flex: 1 1 auto;
-    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .button-group {
-    display: flex;
-    gap: 6px;
-    align-items: center;
-    flex-wrap: wrap;
+    gap: 4px;
 }
 
 .tool-btn {
-    height: 40px;
-    padding: 8px 12px;
-    border-radius: 8px;
-    border: 1px solid rgba(15, 23, 42, 0.06);
-    background: #fff;
-    color: var(--roi-text);
-    font-weight: 700;
-    cursor: pointer;
-    box-sizing: border-box;
+    height: 36px;
+    padding: 6px 10px;
+    font-size: 13px;
 }
 
     .tool-btn:hover {
@@ -169,22 +154,23 @@ body {
 
 .roi-main-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.75fr) minmax(420px, 1fr);
-    gap: 16px;
+    grid-template-columns: minmax(0, 1.82fr) minmax(400px, 0.95fr);
+    gap: 12px;
     align-items: start;
 }
 
 .roi-video-card {
     min-width: 0;
+    padding: 14px;
 }
 
 .card-head {
-    margin-bottom: 14px;
+    margin-bottom: 6px;
 }
 
     .card-head h3 {
         margin: 0;
-        font-size: 1.35rem;
+        font-size: 1.15rem;
         font-weight: 800;
         color: var(--roi-text);
     }
@@ -192,9 +178,9 @@ body {
 .roi-canvas-shell {
     background: #000;
     border-radius: 16px;
-    padding: 10px;
+    padding: 8px;
     overflow: auto;
-    max-height: 560px;
+    max-height: 440px;
 }
 
 .canvas-wrap {
@@ -211,11 +197,25 @@ body {
 .roi-image {
     display: block;
     width: 100%;
-    max-width: 940px;
+    max-width: 860px;
     height: auto;
-    max-height: 520px;
+    max-height: 400px;
     object-fit: contain;
     margin: 0 auto;
+}
+
+.roi-top-card .page-title {
+    margin-bottom: 4px;
+}
+.roi-top-card .save-status {
+    padding: 4px 10px;
+    font-size: 12px;
+}
+
+.roi-top-card .page-desc {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.4;
 }
 
 .roi-canvas {
@@ -240,35 +240,37 @@ body {
 .roi-side-stack--simple {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 10px;
     position: sticky;
-    top: 16px;
+    top: 12px;
     align-items: start;
 }
 
 .roi-state-card,
-.roi-ai-card {
-    padding: 16px;
-    min-height: 280px;
+.roi-ai-card,
+.roi-llm-card {
+    padding: 12px;
+    min-height: 150px;
     display: flex;
     flex-direction: column;
 }
 
     .roi-state-card .card-head,
-    .roi-ai-card .card-head {
-        margin-bottom: 10px;
+    .roi-ai-card .card-head,
+    .roi-llm-card .card-head {
+        margin-bottom: 6px;
         flex: 0 0 auto;
     }
 
 .roi-pre {
     margin: 0;
-    padding: 14px 16px;
+    padding: 8px 10px;
     border: 1px solid var(--roi-border);
-    border-radius: 14px;
+    border-radius: 12px;
     background: #f8fafc;
     color: #0f172a;
-    font-size: 13px;
-    line-height: 1.6;
+    font-size: 12px;
+    line-height: 1.45;
     white-space: pre-wrap;
     word-break: break-word;
     overflow: auto;
@@ -280,6 +282,10 @@ body {
     min-height: 0;
     max-height: none;
     height: 100%;
+}
+
+.roi-llm-card {
+    grid-column: 1 / -1;
 }
 
 @media (max-width: 1200px) {

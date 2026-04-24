@@ -1,10 +1,10 @@
-﻿using FactoryApi.Infrastructure.Persistence;
-using FactoryApi.Models;
+﻿using RealtimeEventApi.Infrastructure.Persistence;
+using RealtimeEventApi.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Text;
 
-namespace FactoryApi.Infrastructure.MediaMtx
+namespace RealtimeEventApi.Infrastructure.MediaMtx
 {
     public sealed class MediaMtxConfigWriter
     {
@@ -59,7 +59,7 @@ namespace FactoryApi.Infrastructure.MediaMtx
             sb.AppendLine("logDestinations: [stdout]");
             sb.AppendLine();
             sb.AppendLine("rtsp: true");
-            sb.AppendLine("rtspAddress: :8554");
+            sb.AppendLine("rtspAddress: :9554");
             sb.AppendLine();
             sb.AppendLine("hls: false");
             sb.AppendLine("webrtc: false");

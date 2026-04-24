@@ -17,7 +17,6 @@ label_roi.jpg
 label_roi_ocr.jpg
 
 # Runtime captures
-RealtimeEventApi/captures/
 captures/
 
 # logs / temp
@@ -29,11 +28,9 @@ appsettings.Development.json
 appsettings.Local.json
 .env
 
-# MediaMTX runtime files
+# MediaMTX runtime
 RealtimeEventApi/tools/mediamtx/mediamtx.exe
 RealtimeEventApi/tools/mediamtx/*.log
-RealtimeEventApi/tools/mediamtx/*.yml
-RealtimeEventApi/tools/mediamtx/*.yaml
 
 # OS files
 Thumbs.db

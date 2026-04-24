@@ -1,9 +1,10 @@
-﻿namespace FactoryApi.Application.Ai
+﻿namespace RealtimeEventApi.Application.Ai.Vision
 {
-    public sealed class PythonValidateRoiResponse
+    public sealed class CameraRoiValidationResult
     {
+        public bool CameraExists { get; set; }
+        public bool ImageExists { get; set; }
         public bool Success { get; set; }
-        public string Message { get; set; } = string.Empty;
 
         public bool ObjectDetected { get; set; }
         public double ObjectConfidence { get; set; }
@@ -15,5 +16,8 @@
         public int LabelCount { get; set; }
         public List<string> LabelTexts { get; set; } = new();
         public bool LabelKeywordFound { get; set; }
+
+        public string Message { get; set; } = string.Empty;
+        public string ImagePath { get; set; } = string.Empty;
     }
 }

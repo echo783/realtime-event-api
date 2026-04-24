@@ -1,4 +1,11 @@
-﻿const btnValidateAi = document.getElementById("btnValidateAi");
+﻿let aiAnalysisBusy = false;
+let latestValidationResult = null;
+let latestDebugState = null;
+
+const aiAnalysisText = document.getElementById("aiAnalysisText");
+const btnAiAnalysis = document.getElementById("btn-ai-analysis");
+
+const btnValidateAi = document.getElementById("btnValidateAi");
 const aiValidationText = document.getElementById("aiValidationText");
 
 const cameraIdEl = document.getElementById("cameraId");
@@ -30,7 +37,9 @@ if (!(cameraIdEl instanceof HTMLInputElement) ||
     !(canvas instanceof HTMLCanvasElement) ||
     !(canvasWrap instanceof HTMLElement) ||
     !(stateText instanceof HTMLElement) ||
-    !(aiValidationText instanceof HTMLElement)) {
+    !(aiValidationText instanceof HTMLElement) ||
+    !(btnAiAnalysis instanceof HTMLButtonElement) ||
+    !(aiAnalysisText instanceof HTMLElement)) {
     throw new Error("ROI 페이지 필수 요소를 찾을 수 없습니다.");
 }
 
@@ -244,8 +253,6 @@ function drawCanvas() {
         "LABEL",
         mode === "label"
     );
-
-    
 }
 
 function fitCanvasToImage(keepCurrentRect = true) {
@@ -474,6 +481,7 @@ async function loadState() {
         }
 
         const s = await res.json();
+        latestDebugState = s;
 
         stateText.textContent =
             `회전 감지 : ${boolText(checkRotationEl.checked)}
@@ -562,9 +570,6 @@ async function saveRoi() {
 async function validateAiRoi() {
     const cameraId = Number(cameraIdEl.value);
 
-    console.log("[AI검증] 버튼 클릭");
-    console.log("[AI검증] cameraId =", cameraId);
-
     if (!cameraId || cameraId <= 0) {
         aiValidationText.textContent = "올바른 Camera ID를 입력하세요.";
         return;
@@ -581,11 +586,9 @@ async function validateAiRoi() {
     setSaveStatus("AI 검증 중...", "saving");
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10초 timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
 
     try {
-        console.log("[AI검증] fetch 시작");
-
         const res = await fetch(`/api/Camera/${cameraId}/validate-roi`, {
             method: "POST",
             headers: roiAuthHeaders(),
@@ -594,12 +597,9 @@ async function validateAiRoi() {
 
         clearTimeout(timeoutId);
 
-        console.log("[AI검증] 응답 도착 status =", res.status);
-
         if (await handleUnauthorized(res)) return;
 
         const rawText = await res.clone().text();
-        console.log("[AI검증] rawText =", rawText);
 
         if (!res.ok) {
             aiValidationText.textContent = `AI 검증 실패\n\n${rawText || "검증 요청 실패"}`;
@@ -608,6 +608,7 @@ async function validateAiRoi() {
         }
 
         const data = await res.json();
+        latestValidationResult = data;
 
         const ocrTexts = (data.labelTexts ?? []).join(", ") || "-";
         const labelDetected = data.labelDetected === true;
@@ -634,7 +635,7 @@ OCR 신뢰도 : ${labelConfidence}
         setSaveStatus(data.ok ? "AI 검증 완료" : "AI 검증 결과 확인", data.ok ? "ok" : "saving");
     } catch (error) {
         clearTimeout(timeoutId);
-        console.error("[AI검증] 오류 =", error);
+        console.error(error);
 
         if (error.name === "AbortError") {
             aiValidationText.textContent = "AI 검증 요청이 10초 동안 응답이 없어 중단되었습니다.";
@@ -648,8 +649,58 @@ OCR 신뢰도 : ${labelConfidence}
     }
 }
 
-btnSave.addEventListener("click", saveRoi);
-btnValidateAi.addEventListener("click", validateAiRoi);
+async function analyzeAiOperation() {
+    if (aiAnalysisBusy) return;
+
+    if (!latestValidationResult) {
+        aiAnalysisText.textContent = "먼저 AI 검증을 실행한 후 분석하세요.";
+        setSaveStatus("AI 검증 후 분석 가능", "err");
+        return;
+    }
+
+    const payload = {
+        rotationDetected: checkRotationEl.checked,
+        labelDetected: latestValidationResult?.labelDetected ?? false,
+        labelTexts: latestValidationResult?.labelTexts ?? [],
+        productionCount: latestDebugState?.productionCount ?? 0
+    };
+
+    try {
+        aiAnalysisBusy = true;
+        btnAiAnalysis.disabled = true;
+        btnAiAnalysis.textContent = "분석 중...";
+        aiAnalysisText.textContent = "AI 운영 분석 중입니다...";
+        setSaveStatus("AI 운영 분석 중입니다...", "saving");
+
+        const res = await fetch("/api/ai/analyze-operations", {
+            method: "POST",
+            headers: roiAuthHeaders({
+                "Content-Type": "application/json"
+            }),
+            body: JSON.stringify(payload)
+        });
+
+        if (await handleUnauthorized(res)) return;
+
+        if (!res.ok) {
+            setSaveStatus("AI 분석 실패", "err");
+            throw new Error(`AI 분석 실패: ${res.status}`);
+        }
+
+        const data = await res.json();
+
+        aiAnalysisText.textContent = data.summary ?? "분석 결과가 없습니다.";
+        setSaveStatus("AI 분석 완료", "ok");
+    } catch (err) {
+        console.error(err);
+        aiAnalysisText.textContent = `AI 분석 오류: ${err.message}`;
+        setSaveStatus("AI 분석 오류", "err");
+    } finally {
+        aiAnalysisBusy = false;
+        btnAiAnalysis.disabled = false;
+        btnAiAnalysis.textContent = "AI 분석";
+    }
+}
 
 btnLoad.addEventListener("click", async () => {
     updatePageTitle();
@@ -660,11 +711,15 @@ btnLoad.addEventListener("click", async () => {
     setSaveStatus("불러오기 완료", "ok");
 });
 
+btnModeObject.addEventListener("click", () => setMode("object"));
+btnModeLabel.addEventListener("click", () => setMode("label"));
 btnSave.addEventListener("click", saveRoi);
+btnValidateAi.addEventListener("click", validateAiRoi);
+btnAiAnalysis.addEventListener("click", analyzeAiOperation);
 
 setInterval(async () => {
-    if (refreshBusy || saveBusy || activeAction || roiDirty) {
-        if (roiDirty && !saveBusy && !activeAction) {
+    if (refreshBusy || saveBusy || aiAnalysisBusy || activeAction || roiDirty) {
+        if (roiDirty && !saveBusy && !aiAnalysisBusy && !activeAction) {
             await loadState();
         }
         return;
@@ -683,6 +738,7 @@ setInterval(async () => {
     if (window.updateGlobalHubState) {
         window.updateGlobalHubState("connected", "ROI Ready");
     }
+
     canvasWrap.classList.remove("ready");
     setSaveStatus("초기 로딩 중...", "saving");
     await loadConfig();

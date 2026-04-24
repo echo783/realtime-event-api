@@ -1,4 +1,4 @@
-﻿namespace FactoryApi.Contracts.Responses.Camera
+﻿namespace RealtimeEventApi.Contracts.Responses.Camera
 {
     public class DeleteCameraResult
     {

@@ -1,8 +1,8 @@
-﻿using FactoryApi.Application.Monitor;   
-using FactoryApi.Contracts.Responses.Monitor;
+﻿using RealtimeEventApi.Application.Monitor;
+using RealtimeEventApi.Contracts.Responses.Monitor;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FactoryApi.Controllers
+namespace RealtimeEventApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]

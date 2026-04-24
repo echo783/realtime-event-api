@@ -1,8 +1,9 @@
 ﻿using System.Text;
 using System.Text.Json;
-using FactoryApi.Application.Ai;
+using RealtimeEventApi.Contracts.Requests.Ai.Vision;
+using RealtimeEventApi.Contracts.Responses.Ai.Vision;
 
-namespace FactoryApi.Infrastructure.Ai
+namespace RealtimeEventApi.Infrastructure.Ai.Vision
 {
     public sealed class PythonVisionClient
     {

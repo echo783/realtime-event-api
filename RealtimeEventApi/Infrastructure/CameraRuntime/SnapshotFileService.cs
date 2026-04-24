@@ -1,6 +1,6 @@
 ﻿using OpenCvSharp;
 
-namespace FactoryApi.Infrastructure.CameraRuntime
+namespace RealtimeEventApi.Infrastructure.CameraRuntime
 {
     public sealed class SnapshotFileService
     {

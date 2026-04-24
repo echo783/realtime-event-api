@@ -1,7 +1,7 @@
-﻿using FactoryApi.Contracts.Responses.Monitor;
-using FactoryApi.Infrastructure.CameraRuntime;
+﻿using RealtimeEventApi.Contracts.Responses.Monitor;
+using RealtimeEventApi.Infrastructure.CameraRuntime;
 
-namespace FactoryApi.Application.Monitor
+namespace RealtimeEventApi.Application.Monitor
 {
     public sealed class MonitorQueryService
     {
@@ -46,7 +46,14 @@ namespace FactoryApi.Application.Monitor
 
                 LastProductionAt = state.LastProductionAt == DateTime.MinValue
                     ? (DateTime?)null
-                    : state.LastProductionAt
+                    : state.LastProductionAt,
+                LastSuccessfulReadAt = state.LastSuccessfulReadAt == DateTime.MinValue
+                    ? (DateTime?)null
+                    : state.LastSuccessfulReadAt,
+                LastErrorAt = state.LastErrorAt == DateTime.MinValue
+                    ? (DateTime?)null
+                    : state.LastErrorAt,
+                LastErrorMessage = state.LastErrorMessage
             };
 
             return dto;

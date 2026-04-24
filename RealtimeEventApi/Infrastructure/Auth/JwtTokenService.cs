@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
-namespace FactoryApi.Infrastructure.Auth
+namespace RealtimeEventApi.Infrastructure.Auth
 {
     public class JwtTokenService
     {

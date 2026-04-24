@@ -1,13 +1,12 @@
-﻿using FactoryApi.Application.Ai;
-using FactoryApi.Application.Camera;
-using FactoryApi.Contracts.Requests.Camera;
-using FactoryApi.Hubs;
+﻿using RealtimeEventApi.Application.Camera;
+using RealtimeEventApi.Contracts.Requests.Camera;
+using RealtimeEventApi.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
-using RealtimeEventApi.Application.Camera;
+using RealtimeEventApi.Application.Ai.Vision;
 
-namespace FactoryApi.Controllers
+namespace RealtimeEventApi.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
@@ -21,11 +20,13 @@ namespace FactoryApi.Controllers
         private readonly CameraImageService _imageService;
         private readonly CameraRoiService _roiService;
         private readonly CameraCommandService _commandService;
+        private readonly CameraRuntimeCommandService _runtimeCommandService;
         private readonly CameraRoiValidationService _roiValidationService;
 
         public CameraController(
         CameraQueryService queryService,
         CameraCommandService commandService,
+        CameraRuntimeCommandService runtimeCommandService,
         CameraRoiService roiService,
         CameraImageService imageService,
         CameraDebugService debugService,
@@ -39,6 +40,7 @@ namespace FactoryApi.Controllers
             _imageService = imageService;
             _roiService = roiService;
             _commandService = commandService;   
+            _runtimeCommandService = runtimeCommandService;
             _logger = logger;
             _hubContext = hubContext;
              _roiValidationService = roiValidationService;
@@ -172,7 +174,7 @@ namespace FactoryApi.Controllers
         [HttpPost("{cameraId:int}/start")]
         public async Task<IActionResult> StartCamera(int cameraId, CancellationToken token)
         {
-            var result = await _commandService.StartCameraAsync(cameraId, token);
+            var result = await _runtimeCommandService.StartCameraAsync(cameraId, token);
             
             if (result == null) return NotFound($"CameraId={cameraId} 카메라를 찾을 수 없습니다.");
 
@@ -185,7 +187,7 @@ namespace FactoryApi.Controllers
         [HttpPost("{cameraId:int}/stop")]
         public async Task<IActionResult> StopCamera(int cameraId, CancellationToken token)
         {
-           var result = await _commandService.StopCameraAsync(cameraId, token);
+           var result = await _runtimeCommandService.StopCameraAsync(cameraId, token);
 
             if (result == null) return NotFound($"CameraID={cameraId} 카메라를 찾을 수 없습니다.");
 
@@ -198,7 +200,7 @@ namespace FactoryApi.Controllers
         [HttpGet("{cameraId:int}/status")]
         public async Task<IActionResult> GetRunStatus(int cameraId, CancellationToken token)
         {
-            var result = await _commandService.GetRunStatusAsync(cameraId, token);
+            var result = await _runtimeCommandService.GetRunStatusAsync(cameraId, token);
 
             if (result == null) return NotFound($"CameraId={cameraId} 카메라를 찾을 수 없습니다.");
 

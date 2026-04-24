@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 
-namespace FactoryApi.Hubs
+namespace RealtimeEventApi.Hubs
 {
     public class CameraHub : Hub
     {

@@ -1,7 +1,7 @@
 ﻿using System.Data;
 using Microsoft.Data.SqlClient;
 
-namespace FactoryApi.Infrastructure.Persistence
+namespace RealtimeEventApi.Infrastructure.Persistence
 {
     public class SqlConnectionFactory
     {

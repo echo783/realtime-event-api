@@ -1,8 +1,8 @@
-﻿using FactoryApi.Infrastructure.Persistence;
+﻿using RealtimeEventApi.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using RealtimeEventApi.Application.Camera.Dtos;
 
-namespace FactoryApi.Application.Camera
+namespace RealtimeEventApi.Application.Camera
 {
     public class CameraImageService
     {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using OpenCvSharp;
 
-namespace FactoryApi.Infrastructure.CameraRuntime
+namespace RealtimeEventApi.Infrastructure.CameraRuntime
 {
     public sealed class WorkerStyleDetectionEngine
     {
@@ -262,9 +262,6 @@ namespace FactoryApi.Infrastructure.CameraRuntime
         {
             const int detectMinFrames = 2;
             const int offMinFrames = 2;
-
-            // 변화량은 디버그용/보조값만 사용
-            const double changeOffThreshold = 0.10;
 
             labelDetectedInZone = _state.LabelInZone;
             labelChange = 0;

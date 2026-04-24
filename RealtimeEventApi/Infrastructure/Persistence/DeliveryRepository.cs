@@ -1,8 +1,8 @@
 ﻿using Dapper;
-using FactoryApi.Contracts.Requests.Delivery;
-using FactoryApi.Contracts.Responses.Delivery;
+using RealtimeEventApi.Contracts.Requests.Delivery;
+using RealtimeEventApi.Contracts.Responses.Delivery;
 
-namespace FactoryApi.Infrastructure.Persistence
+namespace RealtimeEventApi.Infrastructure.Persistence
 {
     public class DeliveryRepository
     {

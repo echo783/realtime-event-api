@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace FactoryApi.Contracts.Requests.Camera
+namespace RealtimeEventApi.Contracts.Requests.Camera
 {
     public class SaveRoiRequest
     {

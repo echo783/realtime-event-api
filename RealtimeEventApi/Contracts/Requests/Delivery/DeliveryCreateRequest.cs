@@ -1,4 +1,4 @@
-﻿namespace FactoryApi.Contracts.Requests.Delivery
+﻿namespace RealtimeEventApi.Contracts.Requests.Delivery
 {
     public class DeliveryCreateRequest
     {

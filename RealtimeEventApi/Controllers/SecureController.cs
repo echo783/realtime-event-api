@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FactoryApi.Controllers
+namespace RealtimeEventApi.Controllers
 {
     [ApiController]
     [Route("api/secure")]

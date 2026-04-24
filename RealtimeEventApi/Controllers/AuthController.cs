@@ -1,9 +1,9 @@
-﻿using FactoryApi.Contracts.Requests.Auth;
-using FactoryApi.Contracts.Responses.Auth;
-using FactoryApi.Infrastructure.Auth;
+﻿using RealtimeEventApi.Contracts.Requests.Auth;
+using RealtimeEventApi.Contracts.Responses.Auth;
+using RealtimeEventApi.Infrastructure.Auth;
 using Microsoft.AspNetCore.Mvc;
 
-namespace FactoryApi.Controllers
+namespace RealtimeEventApi.Controllers
 {
     [ApiController]
     [Route("api/auth")]

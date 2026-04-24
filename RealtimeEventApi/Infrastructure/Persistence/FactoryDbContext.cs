@@ -1,7 +1,7 @@
-﻿using FactoryApi.Models;
+﻿using RealtimeEventApi.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace FactoryApi.Infrastructure.Persistence
+namespace RealtimeEventApi.Infrastructure.Persistence
 {
     public class FactoryDbContext : DbContext
     {

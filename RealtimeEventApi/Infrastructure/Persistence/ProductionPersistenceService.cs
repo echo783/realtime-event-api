@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using FactoryApi.Models;
+using RealtimeEventApi.Models;
 
-namespace FactoryApi.Infrastructure.Persistence
+namespace RealtimeEventApi.Infrastructure.Persistence
 {
     public sealed class ProductionPersistenceService
     {

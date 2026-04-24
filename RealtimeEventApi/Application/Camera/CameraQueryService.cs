@@ -1,9 +1,9 @@
-﻿using FactoryApi.Contracts.Responses.Camera;
-using FactoryApi.Infrastructure.Persistence;
-using FactoryApi.Models;
+﻿using RealtimeEventApi.Contracts.Responses.Camera;
+using RealtimeEventApi.Infrastructure.Persistence;
+using RealtimeEventApi.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace FactoryApi.Application.Camera
+namespace RealtimeEventApi.Application.Camera
 {
     public class CameraQueryService
     {

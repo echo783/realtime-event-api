@@ -1,4 +1,4 @@
-﻿namespace FactoryApi.Contracts.Responses.Auth
+﻿namespace RealtimeEventApi.Contracts.Responses.Auth
 {
     public class LoginResponse
     {

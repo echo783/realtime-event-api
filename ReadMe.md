@@ -95,21 +95,21 @@ Human Role – CHANWOOK JEONG
 **AI tools were used as engineering partners, not as shortcuts.
 Human judgment connected the AI-assisted outputs into one working system.**
 
-Tech Stack
-Backend: ASP.NET Core
-Vision: OpenCvSharp
-Realtime: SignalR
-Database: MSSQL (EF Core + Dapper)
-Frontend: HTML / JavaScript
-External Dependencies
-MediaMTX (RTSP Relay)
-RTSP 스트림 중계
-실행 파일 필요
-Realtime Vision Service
-OCR 기반 ROI 라벨 검증
-Python FastAPI 서비스
+## Tech Stack
+- Backend: ASP.NET Core
+- Vision: OpenCvSharp
+- Realtime: SignalR
+- Database: MSSQL (EF Core + Dapper)
+- Frontend: HTML / JavaScript
+- External Dependencies
+- MediaMTX (RTSP Relay)
+- RTSP 스트림 중계
+- 실행 파일 필요
+- Realtime Vision Service
+- OCR 기반 ROI 라벨 검증
+- Python FastAPI 서비스
 
-https://github.com/echo783/realtime-vision-service
+- https://github.com/echo783/realtime-vision-service
 
 ## What This Project Represents
 
@@ -126,24 +126,24 @@ https://github.com/echo783/realtime-vision-service
 “데이터를 흐름으로 만들고
 흐름을 시스템으로 완성하는 과정”입니다.
 
-Future Direction
-Camera Runtime 인터페이스 분리
-Detection 모듈 구조화
-이벤트 처리 고도화
-AI 분석 기능 확장 (LLM 기반 운영 분석)
-실시간 시스템 아키텍처 고도화
+## Future Direction
+- Camera Runtime 인터페이스 분리
+- Detection 모듈 구조화
+- 이벤트 처리 고도화
+- AI 분석 기능 확장 (LLM 기반 운영 분석)
+- 실시간 시스템 아키텍처 고도화
 
 ## Quick Start (Database)
 
-MSSQL
-ProductVersion : 17.0.1000.7
-ProductLevel : RTM
-Edition : Express Edition (64-bit)
-create DB : FactoryDB
-docs/sql/schema-and-seed.sql 실행
+- MSSQL
+- ProductVersion : 17.0.1000.7
+- ProductLevel : RTM
+- Edition : Express Edition (64-bit)
+- create DB : FactoryDB
+- docs/sql/schema-and-seed.sql 실행
 
 ## 포트폴리오
-docs/myport.pdf
+- docs/myport.pdf
 
 
 AI는 시작을 쉽게 만들었습니다.

@@ -128,7 +128,7 @@ function clearInventory() {
     if (productSelect) productSelect.value = "";
     setResultValues("-", "-", "-");
     showResult(false);
-    showMessage("제품을 선택하고 조회하세요.");
+    showMessage("제품을 선택하고 조회 버튼을 누르세요.");
 }
 
 document.addEventListener("DOMContentLoaded", async () => {

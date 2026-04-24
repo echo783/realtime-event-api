@@ -49,12 +49,28 @@ namespace RealtimeEventApi.Infrastructure.Persistence
                 using var scope = _scopeFactory.CreateScope();
                 var db = scope.ServiceProvider.GetRequiredService<FactoryDbContext>();
 
+                // 1. 저장 직전 동일 카메라의 가장 최신 ProductionCount 조회
+                var lastTotal = await db.ProductionEvents
+                    .AsNoTracking()
+                    .Where(x => x.CameraId == cameraId)
+                    .OrderByDescending(x => x.EventTime)
+                    .Select(x => x.ProductionCount)
+                    .FirstOrDefaultAsync(token);
+
+                // 2. DeltaCount 계산
+                int delta = 0;
+                if (productionCount < lastTotal)
+                    delta = productionCount; // 카운터 리셋 상황
+                else
+                    delta = productionCount - lastTotal;
+
                 var evt = new ProductionEvent
                 {
                     CameraId = cameraId,
                     ProductName = productName,
                     EventTime = eventTime,
                     ProductionCount = productionCount,
+                    DeltaCount = delta,
                     SnapshotPath = snapshotPath,
                     CreatedAt = DateTime.Now
                 };

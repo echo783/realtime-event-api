@@ -19,6 +19,8 @@ namespace RealtimeEventApi.Models
 
         public int ProductionCount { get; set; }
 
+        public int DeltaCount { get; set; }
+
         [MaxLength(500)]
         public string? SnapshotPath { get; set; }
 

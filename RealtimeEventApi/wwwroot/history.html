@@ -7,6 +7,7 @@
 
     <link rel="stylesheet" href="/css/common-layout.css" />
     <link rel="stylesheet" href="/css/history.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="app-shell">
@@ -17,8 +18,8 @@
                 <section class="card history-filter-card">
                     <div class="card-head">
                         <div>
-                            <h2 class="page-title">이벤트 이력 조회</h2>
-                            <p class="page-desc">운영자가 카메라 이벤트 이력을 기간 또는 카메라별로 조회할 수 있습니다.</p>
+                            <h2 class="page-title">이벤트 이력 대시보드</h2>
+                            <p class="page-desc">기간별 생산 이력을 조회하고 생산량 추이를 차트로 확인합니다.</p>
                         </div>
                     </div>
 
@@ -47,53 +48,73 @@
                     </div>
                 </section>
 
-                <section class="card history-results-card">
-                    <div class="card-head">
-                        <div>
-                            <h3 class="section-title">검색 결과</h3>
-                            <p class="page-desc">검색된 이벤트 목록입니다.</p>
+                <div class="history-content-grid">
+                    <section class="card history-results-card">
+                        <div class="card-head">
+                            <div>
+                                <h3 class="section-title">생산 이력 목록</h3>
+                            </div>
+                            <div class="results-meta">
+                                <div class="results-count">검색: <span id="resultCount">-</span></div>
+                                <div id="loading" class="loading" hidden>조회 중...</div>
+                            </div>
                         </div>
-                        <div class="results-meta">
-                            <div class="results-count">검색 결과: <span id="resultCount">-</span></div>
-                            <div id="loading" class="loading" hidden>조회 중...</div>
+
+                        <div id="emptyState" class="empty-state" hidden>데이터가 없습니다.</div>
+
+                        <div class="table-wrap">
+                            <table id="eventsTable" class="events-table">
+                               <thead>
+                                    <tr>
+                                        <th>발생 시간</th>
+                                        <th>카메라</th>
+                                        <th>제품명</th>
+                                        <th>수량</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="eventsTableBody"></tbody>
+                            </table>
                         </div>
-                    </div>
+                    </section>
 
-                    <div id="emptyState" class="empty-state" hidden>조회된 이벤트가 없습니다.</div>
-
-                    <div class="table-wrap">
-                        <table id="eventsTable" class="events-table">
-                            <thead>
-                                <tr>
-                                    <th>발생 시간</th>
-                                    <th>카메라</th>
-                                    <th>이벤트 유형</th>
-                                    <th>메시지</th>
-                                    <th>스냅샷</th>
-                                </tr>
-                            </thead>
-                            <tbody id="eventsTableBody"></tbody>
-                        </table>
-                    </div>
-                </section>
+                    <section class="card history-chart-card">
+                        <div class="card-head">
+                            <h3 class="section-title">시간대별 생산량</h3>
+                        </div>
+                        <div id="chartSummary" class="chart-summary">
+                            <div class="summary-item">
+                                <span class="label">총 생산량</span>
+                                <strong id="totalQty" class="value">-</strong>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">이벤트 건수</span>
+                                <strong id="totalEvents" class="value">-</strong>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">평균 수량</span>
+                                <strong id="avgQty" class="value">-</strong>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">최대 생산 시간</span>
+                                <strong id="peakHour" class="value">-</strong>
+                            </div>
+                            <div class="summary-item">
+                                <span class="label">전일 대비</span>
+                                <strong id="compareValue" class="value">-</strong>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="historyChart"></canvas>
+                        </div>
+                    </section>
+                </div>
             </section>
         </main>
 
         <div id="app-footer"></div>
     </div>
 
-    <div id="snapshotModal" class="snapshot-modal" hidden>
-        <div class="snapshot-modal__backdrop" data-close="true"></div>
-        <div class="snapshot-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="snapshotModalTitle">
-            <button id="snapshotModalClose" class="snapshot-modal__close" type="button" aria-label="닫기">×</button>
-            <div class="snapshot-modal__header">
-                <h3 id="snapshotModalTitle">스냅샷 보기</h3>
-            </div>
-            <div class="snapshot-modal__body">
-                <img id="snapshotModalImage" alt="이벤트 스냅샷" />
-            </div>
-        </div>
-    </div>
+    <!-- Snapshot modal removed as requested -->
 
     <script src="/js/common-layout.js"></script>
     <script src="/js/history.js"></script>

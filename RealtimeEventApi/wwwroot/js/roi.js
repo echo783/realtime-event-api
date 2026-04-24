@@ -268,9 +268,11 @@ function updateStatusUI(data) {
     stateText.textContent = `Camera: ${data.cameraName} (${data.cameraId})
 Status: ${data.status}
 Enabled: ${data.enabled}
-Production: ${data.productionCount ?? 0}
+세션 누적 감지값: ${data.productionCount ?? 0}
 Last Update: ${new Date(data.changedAt).toLocaleTimeString()}
-Message: ${data.message}`;
+Message: ${data.message}
+
+* 본 화면은 실시간 감지 상태 확인용입니다.`;
 
     // 2. 버튼 활성화 제어
     const isCameraReady = data.status === "Running";

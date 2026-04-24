@@ -30,7 +30,10 @@ namespace RealtimeEventApi.Controllers
                 query = query.Where(x => x.EventTime >= from.Value);
 
             if (to.HasValue)
-                query = query.Where(x => x.EventTime <= to.Value);
+            {
+                var toExclusive = to.Value.AddDays(1).Date;
+                query = query.Where(x => x.EventTime < toExclusive);
+            }
 
             var items = await query
                 .OrderByDescending(x => x.EventTime)
@@ -42,6 +45,7 @@ namespace RealtimeEventApi.Controllers
                     x.ProductName,
                     x.EventTime,
                     x.ProductionCount,
+                    x.DeltaCount,
                     ImagePath = x.SnapshotPath,
                     x.CreatedAt
                 })

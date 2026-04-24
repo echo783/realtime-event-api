@@ -22,7 +22,8 @@ namespace RealtimeEventApi.Controllers
 
             var sql = @"
 SELECT DISTINCT ProductName
-FROM dbo.Inventory
+FROM dbo.ProductionEvent
+WHERE ProductName IS NOT NULL AND ProductName <> ''
 ORDER BY ProductName;
 ";
 
@@ -39,9 +40,10 @@ ORDER BY ProductName;
 
             using var conn = _factory.CreateConnection();
 
+            // ProductionEvent의 DeltaCount 합계를 현재 재고(총 생산량)로 계산
             var sql = @"
-SELECT ISNULL(SUM(RemainQuantity), 0)
-FROM dbo.Inventory
+SELECT ISNULL(SUM(DeltaCount), 0)
+FROM dbo.ProductionEvent
 WHERE ProductName = @ProductName;
 ";
 
@@ -50,6 +52,7 @@ WHERE ProductName = @ProductName;
             return Ok(new
             {
                 productName,
+                // remainQuantity의 실제 의미는 ProductionEvent.DeltaCount의 합계(누적 생산량)임
                 remainQuantity = stock
             });
         }

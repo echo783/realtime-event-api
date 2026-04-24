@@ -47,10 +47,10 @@
 
         <nav class="app-nav" aria-label="전역 메뉴">
           <a href="/index.html" class="app-nav__link ${active === "home" ? "is-active" : ""}">운영 메인</a>
-          <a href="/camera-management.html" class="app-nav__link ${active === "camera" ? "is-active" : ""}">카메라 관리</a>
-          <a href="/history.html" class="app-nav__link ${active === "history" ? "is-active" : ""}">이벤트 이력</a>
-          <a href="/inventory.html" class="app-nav__link ${active === "inventory" ? "is-active" : ""}">재고 조회</a>
           <a href="${roiHref}" class="app-nav__link ${active === "roi" ? "is-active" : ""}">ROI 설정</a>
+          <a href="/history.html" class="app-nav__link ${active === "history" ? "is-active" : ""}">이벤트 이력</a>
+          <a href="/inventory.html" class="app-nav__link ${active === "inventory" ? "is-active" : ""}">누적 생산량 조회</a>
+          <a href="/camera-management.html" class="app-nav__link ${active === "camera" ? "is-active" : ""}">카메라 관리</a>
         </nav>
       </header>
     `;

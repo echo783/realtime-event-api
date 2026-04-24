@@ -8,3 +8,6 @@ RealtimeEventApi/wwwroot/** linguist-vendored
 # Generated/build outputs excluded if tracked accidentally
 **/bin/** linguist-vendored
 **/obj/** linguist-vendored
+
+# Exclude v0 design reference prototype from GitHub language stats
+RealtimeEventApi/docs/design-reference/v0/** linguist-vendored

@@ -110,7 +110,12 @@ namespace RealtimeEventApi.Infrastructure.CameraRuntime
                     cam.RtspUrl,
                     _labelDetector);
 
-                _sessions.TryAdd(cam.CameraId, runner);
+                if (!_sessions.TryAdd(cam.CameraId, runner))
+                {
+                    await runner.DisposeAsync();
+                    return CameraRuntimeCommandResult.Fail("카메라 세션이 이미 생성되었습니다.");
+                }
+
                 await runner.StartAsync(token);
 
                 // 즉시 상태 전파 (Starting/Connecting 상태 반영)
@@ -244,14 +249,20 @@ namespace RealtimeEventApi.Infrastructure.CameraRuntime
                                 cam.RtspUrl,
                                 _labelDetector);
 
-                            _sessions.TryAdd(cam.CameraId, runner);
-                            await runner.StartAsync(stoppingToken);
+                            if (_sessions.TryAdd(cam.CameraId, runner))
+                            {
+                                await runner.StartAsync(stoppingToken);
 
-                            _logger.LogDebug(
-                                "Camera session added. CameraId={CameraId}, CameraName={CameraName}, RtspUrl={RtspUrl}",
-                                cam.CameraId,
-                                cam.CameraName,
-                                cam.RtspUrl);
+                                _logger.LogDebug(
+                                    "Camera session added. CameraId={CameraId}, CameraName={CameraName}, RtspUrl={RtspUrl}",
+                                    cam.CameraId,
+                                    cam.CameraName,
+                                    cam.RtspUrl);
+                            }
+                            else
+                            {
+                                await runner.DisposeAsync();
+                            }
                         }
 
                         var removedIds = _sessions.Keys

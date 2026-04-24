@@ -91,6 +91,18 @@ Human Role – CHANWOOK JEONG
 - 시스템 구조 설계
 - AI 결과 검증 통합
 - 시스템 완성
+
+---
+
+## Engineering Insight
+
+AI는 시작을 쉽게 만들었습니다.
+
+하지만
+
+시스템을 설계하고  
+실제로 동작하는 구조로 완성하는 것은  
+여전히 사람의 역할입니다.
   
 **AI tools were used as engineering partners, not as shortcuts.
 Human judgment connected the AI-assisted outputs into one working system.**
@@ -144,14 +156,3 @@ Human judgment connected the AI-assisted outputs into one working system.**
 
 ## 포트폴리오
 - docs/myport.pdf
-
-
-AI는 시작을 쉽게 만들었습니다.
-
-하지만
-
-시스템을 설계하고
-실제로 동작하는 구조로 완성하는 것은
-
-여전히 사람의 역할입니다.
-

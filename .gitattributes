@@ -1,7 +1,10 @@
+# GitHub language detection
 *.cs linguist-language=C#
-*.js linguist-language=JavaScript
-*.ts linguist-language=TypeScript
-*.html linguist-language=HTML
 
-# 특정 폴더 제외
-wwwroot/* linguist-vendored
+# Frontend/static files are part of demo UI, not the main backend language
+RealtimeEventApi/wwwroot/** linguist-vendored
+**/wwwroot/** linguist-vendored
+
+# Generated/build outputs excluded if tracked accidentally
+**/bin/** linguist-vendored
+**/obj/** linguist-vendored

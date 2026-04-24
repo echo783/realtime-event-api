@@ -125,13 +125,11 @@ Human judgment connected the AI-assisted outputs into one working system.**
 
 ## What This Project Represents
 
-이 프로젝트는 단순한 기능 구현이 아니라,
+이 프로젝트는 
 
 - 실시간 데이터 흐름을 설계하고
 - 물리 장비 데이터를 이벤트와 상태로 변환하며
 - 시스템 전체를 하나의 구조로 연결하는 과정
-
-을 실제로 구현한 결과입니다.
 
 핵심은 코드가 아니라
 

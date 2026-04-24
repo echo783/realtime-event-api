@@ -1,181 +1,142 @@
 # realtime-event-api
 
-> RTSP 기반 영상 데이터를 실시간 이벤트로 변환하여 API로 제공하는 시스템
- 
-RTSP 기반 실시간 영상 분석 및 이벤트 처리 시스템입니다.  
-C#, ASP.NET Core, SignalR, OpenCV, MSSQL 기반으로 구성했으며,  
-영상 데이터 → 이벤트 → 상태 → API → 웹 UI 흐름을 중심으로 설계했습니다.
+> RTSP 기반 영상 데이터를 실시간 이벤트로 변환하는 시스템  
+> AI와 협업하여 설계 및 구현된 Industrial Monitoring API
 
-※ 본 시스템은 다음 외부 서비스와 연동됩니다.
-- MediaMTX: RTSP 스트림 중계
-- Realtime Vision Service: OCR 기반 ROI 라벨 검증
+---
+
+## Vision
+
+이 프로젝트는 단순한 영상 처리 시스템이 아니라,  
+**AI와 사람이 함께 시스템을 만들어가는 방식**을 실험하기 위해 시작되었습니다.
+
+개발 과정에서 AI는 코드 생성 도구가 아니라  
+설계, 검증, UI, 구조 개선까지 함께 수행하는 **협업 파트너**로 활용되었습니다.
+
+저는 그 결과들을 연결하고,  
+실제 동작하는 시스템으로 통합하는 역할을 수행했습니다.
+
+앞으로 개발은 특정 개인의 역량이 아니라  
+**AI와 협업하는 방식으로 확장되는 방향으로 변화할 것**이라고 생각합니다.
+
+이 프로젝트는 그 흐름을 기반으로 만들어졌습니다.
 
 ---
 
 ## Overview
 
-RTSP 카메라 스트림을 분석하여  
-특정 영역(ROI)에서 발생하는 이벤트를 감지하고  
-이를 **실시간 상태 데이터로 변환하여 API로 제공하는 시스템**입니다.
+RTSP 카메라 스트림을 기반으로  
+특정 영역(ROI)에서 발생하는 변화를 감지하고
+
+이를 **이벤트 → 상태 → API → UI** 흐름으로 변환하는 시스템입니다.
 
 운영자는 웹 UI를 통해  
-카메라 제어, 상태 모니터링, ROI 설정을 실시간으로 수행할 수 있습니다.
+카메라 상태, 이벤트, ROI 설정을 실시간으로 제어할 수 있습니다.
 
 ---
 
-## Key Features
+## Core Flow
 
-- RTSP 영상 기반 실시간 이벤트 감지
-- ROI 기반 객체 변화 및 라벨 진입 판단
-- 생산 이벤트(Count) 생성 및 상태 관리
-- 카메라 제어 API (Start / Stop / Status)
-- SignalR 기반 실시간 상태 전송
-- ROI 설정 및 디버그 기능
-- JWT 기반 인증 및 보호된 API
-- Python OCR 서비스 연동 기반 AI 라벨 검증
-- 
----
+```text
+RTSP Stream
+   ↓
+Frame Processing (OpenCV)
+   ↓
+ROI Detection
+   ↓
+Event Generation
+   ↓
+State Management
+   ↓
+API (ASP.NET Core)
+   ↓
+Web UI (Realtime Dashboard)
+```
 
-## Architecture
-
+Architecture
 ```text
 Controller → Application → Infrastructure
                       ↓
-               Camera Runtime (OpenCV)
+               Camera Runtime
                       ↓
-                  MSSQL
+                    MSSQL
 
 Application → External Service (HTTP)
                       ↓
-         Realtime Vision Service (FastAPI + OCR)
-
+         Realtime Vision Service (OCR)
 ```
-- API 중심 구조로 웹 UI 및 외부 시스템과 확장 가능
-- 런타임 영상 처리와 비즈니스 로직 분리
-- DTO 기반 요청/응답 모델 분리
+API 중심 구조
+Runtime / Application 분리
+외부 AI 서비스와 유연한 연동 구조
 
----
+Key Features
+RTSP 기반 실시간 영상 처리
+ROI 기반 이벤트 감지
+생산 이벤트 카운팅 및 상태 관리
+SignalR 기반 실시간 상태 전송
+카메라 제어 API (Start / Stop / Status)
+ROI 디버그 및 설정 UI
+OCR 기반 라벨 검증 (Python 서비스 연동)
+AI Collaboration
 
-## Tech Stack
+이 시스템은 다음과 같은 AI 도구들과 협업하여 개발되었습니다.
 
-- Backend: ASP.NET Core
-- Vision: OpenCvSharp (OpenCV)
-- Communication: SignalR
-- Database: MSSQL (EF Core + Dapper)
-- Frontend: HTML / JavaScript
+ChatGPT
+시스템 설계 및 문제 해결
+Codex
+코드 생성 및 리팩터링
+Gemini
+UI 구조 및 UX 개선
+NanoBanana
+로고 및 디자인 생성
+v0 (Vercel)
+UI 프로토타이핑 및 레이아웃 설계
+Human Role
+CHANWOOK JEONG (Korea)
+System Orchestrator
+시스템 방향 조율
+AI 결과 검토 및 통합
+실제 동작 가능한 구조로 연결
 
----
+AI tools were used as engineering partners, not as shortcuts.
+Human judgment connected the AI-assisted outputs into one working system.
 
-## Technical Highlights
+Tech Stack
+Backend: ASP.NET Core
+Vision: OpenCvSharp
+Realtime: SignalR
+Database: MSSQL (EF Core + Dapper)
+Frontend: HTML / JavaScript
+External Dependencies
+MediaMTX (RTSP Relay)
+RTSP 스트림 중계
+실행 파일 필요
+Realtime Vision Service
+OCR 기반 ROI 라벨 검증
+Python FastAPI 서비스
 
-- OpenCV 기반 프레임 변화량 분석 로직 직접 구현
-- ROI 기반 이벤트 감지 구조 설계
-- CameraOrchestrator 기반 런타임 세션 관리
-- EF Core + Dapper 혼합 구조로 성능과 생산성 균형
-- 실시간 데이터 처리 및 상태 관리 구조 설계
-
----
-
-## Web UI
-
-- 로그인 (JWT 인증)
-- 카메라 상태 조회 및 제어
-- 실시간 상태 모니터링
-- ROI 디버그 페이지 (좌표 수정 및 저장)
-
----
-
-## Project Structure
-```text
-RealtimeEventApi
-├─ Controllers
-├─ Application
-├─ Contracts
-├─ Infrastructure
-│ ├─ CameraRuntime
-│ ├─ Persistence
-│ └─ DependencyInjection
-├─ Models
-└─ wwwroot
-
-docs
-└─ Portfolio 자료
-```
-
-
----
-
-## What I Focused On
-
-- 실시간 영상 데이터를 **이벤트 기반 상태로 변환하는 구조 설계**
-- API 중심 아키텍처로 확장성과 유지보수성 확보
-- 장비(RTSP 카메라) 연동 기반 시스템 구현 경험
-- Runtime / Application / Infrastructure 계층 분리
-
----
-
-## Future Improvements
-
-- Camera Runtime 인터페이스화 (ICameraRuntimeManager)
-- Detection 모듈 분리
-- Query / Command 구조 개선
-- Logging 및 모니터링 구조 강화
-- Domain 구조 개선
-
----
-
-## External Dependency (MediaMTX)
-
-MediaMTX 실행 파일을 별도 준비 후
-RealtimeEventApi/tools/mediamtx/ 경로에 배치해야 합니다.
-
-필수 파일:
-- mediamtx.exe
-
-다운로드:
-https://drive.google.com/file/d/1MmPli1E5Jfl-LgpTdv6rewxB1XXXY1VW/view?usp=drive_link
-
-테스트 URL
-rtsp://admin:chan1324!@cksdnr7979223.iptime.org:8554/Streaming/Channels/101
-
-※ 실행 전 mediamtx.exe가 해당 경로에 존재해야 정상적으로 카메라 스트림이 동작합니다.
-
----
-
-## External Dependency (Realtime Vision Service)
-
-ROI 설정 페이지의 **AI 라벨 검증 기능**을 사용하려면  
-별도의 Python OCR 서비스인 **Realtime Vision Service**를 함께 실행해야 합니다.
-
-이유:
-- ROI 영역의 라벨 이미지를 OCR로 분석
-- 의미 있는 텍스트 감지 여부 판단
-- C# API에서 Python 서비스로 HTTP 요청을 보내 검증 결과를 수신
-
-연동 구조:
-- `realtime-event-api` → 운영 API / 웹 UI / 상태 관리
-- `realtime-vision-service` → OCR 기반 ROI 라벨 검증 서비스
-
-Python 서비스 저장소:
-Python 서비스 저장소:
 https://github.com/echo783/realtime-vision-service
 
-기본 실행 주소:
-http://localhost:8000
+What This Project Represents
 
-예시 실행:
-```bash
-uvicorn main:app --host 0.0.0.0 --port 8000
-```
-참고:
-Python 서비스가 실행되지 않으면 ROI 화면의 AI 검증 기능은 동작하지 않습니다.
-일반 ROI 조회/저장 기능은 C# 프로젝트만으로 동작합니다.
+이 프로젝트는 단순한 기능 구현이 아니라,
 
----
+실시간 데이터 흐름 설계
+장비 기반 시스템 구성
+AI 협업 기반 개발 방식
 
-## Portfolio
+을 실제로 구현한 결과입니다.
 
-  docs/RealtimeEventApi.pdf
+핵심은 코드 자체가 아니라
+시스템을 구성하고 연결하는 과정입니다.
+
+Future Direction
+Camera Runtime 인터페이스 분리
+Detection 모듈 구조화
+이벤트 처리 고도화
+AI 분석 기능 확장 (LLM 기반 운영 분석)
+실시간 시스템 아키텍처 고도화
+
 
 
 

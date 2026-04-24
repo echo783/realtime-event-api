@@ -70,34 +70,29 @@ Runtime / Application 분리
 외부 AI 서비스와 유연한 연동 구조
 
 ## Key Features
-RTSP 기반 실시간 영상 처리
-ROI 기반 이벤트 감지
-생산 이벤트 카운팅 및 상태 관리
-SignalR 기반 실시간 상태 전송
-카메라 제어 API (Start / Stop / Status)
-ROI 디버그 및 설정 UI
-OCR 기반 라벨 검증 (Python 서비스 연동)
-AI Collaboration
 
-## 이 시스템은 다음과 같은 AI 도구들과 협업하여 개발되었습니다.
+- 영상 데이터를 이벤트로 변환하는 구조
+- ROI 기반 변화 감지를 통한 생산 이벤트 생성
+- 이벤트 → 상태 → API 흐름으로 데이터 구조화
+- SignalR 기반 실시간 상태 공유
+- 외부 OCR 서비스 연동을 통한 라벨 검증
 
-ChatGPT
-시스템 설계 및 문제 해결
-Codex
-코드 생성 및 리팩터링
-Gemini
-UI 구조 및 UX 개선
-NanoBanana
-로고 및 디자인 생성
-v0 (Vercel)
-UI 프로토타이핑 및 레이아웃 설계
-Human Role
-CHANWOOK JEONG (Korea)
-System Orchestrator
-시스템 방향 조율
-AI 결과 검토 및 통합
-실제 동작 가능한 구조로 연결
+## AI Collaboration
 
+AI는 코드 생성 도구가 아니라
+설계와 검증을 함께 수행하는 협업 파트너로 활용되었습니다.
+
+- 구조 설계 검토
+- 코드 생성 및 리팩터링
+- UI 흐름 개선
+
+Human Role – CHANWOOK JEONG
+
+- 시스템 전체 구조 설계
+- AI 결과 검증 및 통합
+- Runtime / Application 분리 구조 설계
+- 실제 운영 가능한 형태로 시스템 완성
+  
 **AI tools were used as engineering partners, not as shortcuts.
 Human judgment connected the AI-assisted outputs into one working system.**
 
@@ -117,18 +112,20 @@ Python FastAPI 서비스
 
 https://github.com/echo783/realtime-vision-service
 
-What This Project Represents
+## What This Project Represents
 
 이 프로젝트는 단순한 기능 구현이 아니라,
 
-실시간 데이터 흐름 설계
-장비 기반 시스템 구성
-AI 협업 기반 개발 방식
+- 실시간 데이터 흐름을 설계하고
+- 물리 장비 데이터를 이벤트와 상태로 변환하며
+- 시스템 전체를 하나의 구조로 연결하는 과정
 
 을 실제로 구현한 결과입니다.
 
-핵심은 코드 자체가 아니라
-시스템을 구성하고 연결하는 과정입니다.
+핵심은 코드가 아니라
+
+“데이터를 흐름으로 만들고
+흐름을 시스템으로 완성하는 과정”입니다.
 
 Future Direction
 Camera Runtime 인터페이스 분리
@@ -150,4 +147,12 @@ docs/sql/schema-and-seed.sql 실행
 docs/myport.pdf
 
 
+AI는 시작을 쉽게 만들었습니다.
+
+하지만
+
+시스템을 설계하고
+실제로 동작하는 구조로 완성하는 것은
+
+여전히 사람의 역할입니다.
 

@@ -85,49 +85,72 @@ body {
     }
 
 .toolbar-row {
-    gap: 8px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
     align-items: flex-end;
 }
 
 .field {
+    display: grid;
     gap: 4px;
+    flex: 0 1 320px;
 }
 
 .field-label {
     font-size: 13px;
     font-weight: 700;
-    color: var(--roi-muted);
+    color: #cbd5e1;
 }
 
 .tool-controls {
-    gap: 8px;
+    display: flex;
+    flex: 1 1 560px;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
 }
 
 .button-group {
-    gap: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
 }
 
-.tool-btn {
-    height: 36px;
-    padding: 6px 10px;
+.tool-btn,
+.button-group .btn {
+    min-height: 40px;
+    height: 40px;
+    padding: 0 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    background: rgba(15, 23, 42, 0.78);
+    color: #dbeafe;
     font-size: 13px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    box-shadow: none;
 }
 
-    .tool-btn:hover {
-        background: #f8fafc;
+    .tool-btn:hover,
+    .button-group .btn:hover {
+        background: rgba(34, 211, 238, 0.1);
+        border-color: rgba(34, 211, 238, 0.48);
+        color: #f0f9ff;
     }
 
 .btn-toggle {
-    border-radius: 6px;
-    padding: 8px 12px;
+    border-radius: 8px;
 }
 
     .btn-toggle.active-mode,
     .btn-toggle.active-mode:hover {
-        background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%);
-        color: #fff;
-        border-color: transparent;
-        box-shadow: 0 8px 18px rgba(37, 99, 235, 0.12);
+        background: linear-gradient(135deg, rgba(34, 211, 238, 0.95), rgba(59, 130, 246, 0.9));
+        color: #00111c;
+        border-color: rgba(125, 211, 252, 0.9);
+        box-shadow: 0 0 18px rgba(34, 211, 238, 0.34);
     }
 
 .btn-emphasize {
@@ -139,17 +162,35 @@ body {
 
 .checks {
     display: flex;
-    gap: 12px;
+    width: 100%;
+    gap: 14px;
     align-items: center;
     flex-wrap: wrap;
+    padding-top: 2px;
 }
 
 .check {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    font-weight: 600;
-    color: var(--roi-text);
+    min-height: 34px;
+    border: 1px solid rgba(94, 234, 212, 0.2);
+    border-radius: 999px;
+    background: rgba(2, 6, 23, 0.42);
+    padding: 0 12px;
+    color: #e5f2ff;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.check span {
+    color: #e5f2ff;
+}
+
+.check input {
+    width: 16px;
+    height: 16px;
+    accent-color: #22d3ee;
 }
 
 .roi-main-grid {
@@ -324,6 +365,23 @@ body {
     .checks,
     .button-group {
         align-items: stretch;
+    }
+
+    .toolbar-row,
+    .tool-controls,
+    .button-group {
+        flex-direction: column;
+    }
+
+    .field,
+    .tool-controls {
+        flex-basis: auto;
+        width: 100%;
+    }
+
+    .tool-btn,
+    .button-group .btn {
+        width: 100%;
     }
 
     .roi-side-stack--simple {

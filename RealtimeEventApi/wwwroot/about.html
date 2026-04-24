@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8" />
+    <title>AIMS 소개</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/css/common-layout.css" />
+    <style>
+        .app-main {
+            flex: 1;
+            min-height: 0;
+            overflow: auto;
+        }
+
+        .about-page {
+            width: min(1280px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 18px 0 28px;
+        }
+
+        .about-hero {
+            margin-bottom: 14px;
+            padding: 20px 22px;
+        }
+
+        .about-kicker,
+        .workflow-label {
+            display: inline-flex;
+            align-items: center;
+            min-height: 26px;
+            margin: 0 0 10px;
+            border: 1px solid rgba(34, 211, 238, 0.38);
+            border-radius: 999px;
+            padding: 0 11px;
+            background: rgba(34, 211, 238, 0.08);
+            color: #67e8f9;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+        }
+
+        .about-title {
+            margin: 0;
+            color: var(--text);
+            font-size: clamp(26px, 3vw, 36px);
+            font-weight: 800;
+            letter-spacing: 0;
+        }
+
+        .about-subtitle {
+            max-width: 880px;
+            margin: 10px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.62;
+        }
+
+        .about-main-grid {
+            display: grid;
+            grid-template-columns: minmax(320px, 0.9fr) minmax(420px, 1.35fr);
+            gap: 14px;
+            align-items: stretch;
+        }
+
+        .about-bottom-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+            gap: 14px;
+            margin-top: 14px;
+        }
+
+        .about-section {
+            min-height: 0;
+            padding: 18px;
+        }
+
+        .about-section h2 {
+            margin: 0 0 12px;
+            color: var(--text);
+            font-size: 18px;
+            font-weight: 750;
+        }
+
+        .about-list,
+        .workflow-grid,
+        .tech-stack {
+            display: grid;
+            gap: 10px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .about-list li,
+        .workflow-card,
+        .tech-item {
+            border: 1px solid rgba(94, 234, 212, 0.18);
+            border-radius: 10px;
+            background: rgba(2, 6, 23, 0.46);
+            padding: 12px;
+            color: var(--muted);
+            line-height: 1.48;
+        }
+
+        .about-list strong,
+        .workflow-card strong,
+        .tech-item h3 {
+            display: block;
+            margin: 0 0 4px;
+            color: var(--text);
+            font-size: 14px;
+            font-weight: 800;
+        }
+
+        .ai-workflow {
+            position: relative;
+            overflow: hidden;
+            border-color: rgba(34, 211, 238, 0.36) !important;
+            box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.08), 0 18px 54px rgba(0, 0, 0, 0.36) !important;
+        }
+
+        .ai-workflow::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(135deg, rgba(34, 211, 238, 0.12), transparent 38%, rgba(34, 197, 94, 0.08));
+        }
+
+        .ai-workflow > * {
+            position: relative;
+        }
+
+        .workflow-intro {
+            margin: 0 0 12px;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.62;
+        }
+
+        .workflow-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .workflow-card {
+            min-height: 96px;
+            border-color: rgba(34, 211, 238, 0.28);
+            box-shadow: inset 0 0 0 1px rgba(34, 211, 238, 0.05), 0 0 18px rgba(34, 211, 238, 0.08);
+        }
+
+        .workflow-card strong {
+            color: #67e8f9;
+            font-size: 15px;
+        }
+
+        .workflow-card p,
+        .tech-item p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .workflow-card--human {
+            border-color: rgba(34, 197, 94, 0.36);
+            box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.05), 0 0 18px rgba(34, 197, 94, 0.1);
+        }
+
+        .workflow-card--human strong {
+            color: #86efac;
+        }
+
+        .workflow-note {
+            margin: 12px 0 0;
+            border-left: 3px solid #22d3ee;
+            border-radius: 10px;
+            background: rgba(34, 211, 238, 0.07);
+            padding: 12px 14px;
+            color: var(--muted);
+            font-size: 13px;
+            line-height: 1.62;
+        }
+
+        .workflow-note strong {
+            display: block;
+            margin-bottom: 3px;
+            color: var(--text);
+        }
+
+        .tech-stack {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .concept-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .concept-chip {
+            display: inline-flex;
+            align-items: center;
+            min-height: 34px;
+            border: 1px solid var(--border-strong);
+            border-radius: 999px;
+            padding: 0 14px;
+            background: rgba(34, 211, 238, 0.08);
+            color: #bae6fd;
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        @media (max-width: 1080px) {
+            .about-main-grid,
+            .about-bottom-grid,
+            .tech-stack {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .about-page {
+                width: min(100% - 24px, 640px);
+                padding-top: 14px;
+            }
+
+            .about-hero,
+            .about-section {
+                padding: 16px;
+            }
+
+            .workflow-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <div id="app-header"></div>
+
+        <main class="app-main">
+            <div class="about-page">
+                <section class="card about-hero">
+                    <p class="about-kicker">INDUSTRIAL VISION AI</p>
+                    <h1 class="about-title">AIMS (Advanced Industrial Monitoring System)</h1>
+                    <p class="about-subtitle">
+                        AIMS는 RTSP 카메라 영상, ROI 기반 분석, 실시간 상태 동기화, 생산 데이터 시각화를 하나의 운영 화면으로 연결하는
+                        산업용 모니터링 시스템입니다.
+                    </p>
+                </section>
+
+                <section class="about-main-grid">
+                    <article class="card about-section">
+                        <h2>시스템 설명</h2>
+                        <ul class="about-list">
+                            <li>
+                                <strong>RTSP 카메라 기반 모니터링</strong>
+                                현장 카메라 스트림을 연결하고 카메라별 실행 상태를 관리합니다.
+                            </li>
+                            <li>
+                                <strong>ROI 검출</strong>
+                                관심 영역을 기준으로 라벨, 회전, 생산 이벤트 분석 범위를 제어합니다.
+                            </li>
+                            <li>
+                                <strong>SignalR 실시간 상태 동기화</strong>
+                                카메라 실행 상태와 운영 이벤트를 브라우저 화면에 즉시 반영합니다.
+                            </li>
+                            <li>
+                                <strong>생산 데이터 시각화</strong>
+                                감지 결과와 생산 이력을 조회하고 운영 판단에 필요한 정보를 정리합니다.
+                            </li>
+                        </ul>
+                    </article>
+
+                    <article class="card about-section ai-workflow">
+                        <span class="workflow-label">AI ENGINEERING WORKFLOW</span>
+                        <h2>AI 기반 개발 방식</h2>
+                        <p class="workflow-intro">
+                            AIMS는 AI 도구를 단순 코드 생성기가 아니라, 시스템 설계·검증·디자인·프로토타이핑을 함께 수행하는
+                            엔지니어링 협업 도구로 활용하여 개발되었습니다.
+                        </p>
+                        <div class="workflow-grid" aria-label="AI 기반 개발 방식">
+                            <article class="workflow-card">
+                                <strong>ChatGPT</strong>
+                                <p>시스템 설계 및 문제 해결</p>
+                            </article>
+                            <article class="workflow-card">
+                                <strong>Codex</strong>
+                                <p>코드 생성 및 리팩터링</p>
+                            </article>
+                            <article class="workflow-card">
+                                <strong>Gemini</strong>
+                                <p>UI 구조 및 UX 개선</p>
+                            </article>
+                            <article class="workflow-card">
+                                <strong>NanoBanana</strong>
+                                <p>로고 및 브랜드 디자인 생성</p>
+                            </article>
+                            <article class="workflow-card">
+                                <strong>v0 (Vercel)</strong>
+                                <p>UI 프로토타이핑 및 레이아웃 설계</p>
+                            </article>
+                            <article class="workflow-card workflow-card--human">
+                                <strong>CHANWOOK JEONG</strong>
+                                <p>System Orchestrator<br>시스템 방향 조율, 최종 판단, AI 결과 검토 및 실제 프로젝트 구조 통합</p>
+                            </article>
+                        </div>
+                        <p class="workflow-note">
+                            <strong>AI tools were used as engineering partners, not as shortcuts.</strong>
+                            Human judgment connected the AI-assisted outputs into one working system.
+                        </p>
+                    </article>
+                </section>
+
+                <section class="about-bottom-grid">
+                    <article class="card about-section">
+                        <h2>기술 스택</h2>
+                        <div class="tech-stack">
+                            <article class="tech-item">
+                                <h3>ASP.NET Core</h3>
+                                <p>API, 인증, DI, 백그라운드 서비스, 카메라 런타임 제어의 서버 기반입니다.</p>
+                            </article>
+                            <article class="tech-item">
+                                <h3>SignalR</h3>
+                                <p>카메라 상태 변화와 운영 이벤트를 실시간으로 전달합니다.</p>
+                            </article>
+                            <article class="tech-item">
+                                <h3>OpenCV</h3>
+                                <p>RTSP 프레임 처리, ROI 기반 이미지 분석, 영상 검출 로직의 핵심 계층입니다.</p>
+                            </article>
+                        </div>
+                    </article>
+
+                    <article class="card about-section">
+                        <h2>디자인 컨셉</h2>
+                        <div class="concept-row">
+                            <span class="concept-chip">Industrial Tech</span>
+                            <span class="concept-chip">Dark + Neon Blue / Green</span>
+                            <span class="concept-chip">Digital Twin UI</span>
+                        </div>
+                    </article>
+                </section>
+            </div>
+        </main>
+
+        <div id="app-footer"></div>
+    </div>
+
+    <script src="/js/common-layout.js"></script>
+</body>
+</html>

@@ -98,6 +98,7 @@ function setMode(nextMode) {
     mode = nextMode;
     btnModeObject.classList.toggle("active-mode", mode === "object");
     btnModeLabel.classList.toggle("active-mode", mode === "label");
+    activeAction = null;
     drawCanvas();
 }
 
@@ -116,6 +117,16 @@ function getHandleRect(rect) {
 
 function pointInRect(x, y, rect) {
     return x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h;
+}
+
+function getCanvasPoint(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    return {
+        x: Math.round((e.clientX - rect.left) * scaleX),
+        y: Math.round((e.clientY - rect.top) * scaleY)
+    };
 }
 
 function drawSingleRect(rect, strokeColor, fillColor, title, selected) {
@@ -404,6 +415,9 @@ btnLiveRefresh.addEventListener("click", () => {
     else stopPolling();
 });
 
+btnModeObject.addEventListener("click", () => setMode("object"));
+btnModeLabel.addEventListener("click", () => setMode("label"));
+
 btnSave.addEventListener("click", async () => {
     if (saveBusy) return;
     saveBusy = true;
@@ -447,8 +461,7 @@ btnSave.addEventListener("click", async () => {
 });
 
 canvas.addEventListener("mousedown", e => {
-    const rect = canvas.getBoundingClientRect();
-    const p = { x: Math.round(e.clientX - rect.left), y: Math.round(e.clientY - rect.top) };
+    const p = getCanvasPoint(e);
     const r = getSelectedRect();
     const h = getHandleRect(r);
 
@@ -456,12 +469,12 @@ canvas.addEventListener("mousedown", e => {
     dragRectStart = { ...r };
     if (pointInRect(p.x, p.y, h)) activeAction = "resize";
     else if (pointInRect(p.x, p.y, r)) activeAction = "move";
+    else activeAction = null;
 });
 
 window.addEventListener("mousemove", e => {
     if (!activeAction) return;
-    const canvasRect = canvas.getBoundingClientRect();
-    const p = { x: Math.round(e.clientX - canvasRect.left), y: Math.round(e.clientY - canvasRect.top) };
+    const p = getCanvasPoint(e);
     let r = { ...dragRectStart };
 
     if (activeAction === "move") {

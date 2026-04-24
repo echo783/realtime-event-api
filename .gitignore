@@ -16,6 +16,10 @@ object_roi.jpg
 label_roi.jpg
 label_roi_ocr.jpg
 
+# Runtime captures
+RealtimeEventApi/captures/
+captures/
+
 # logs / temp
 *.log
 *.tmp

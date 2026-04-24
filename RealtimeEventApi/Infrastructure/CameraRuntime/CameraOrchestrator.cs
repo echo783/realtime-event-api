@@ -17,8 +17,9 @@ namespace RealtimeEventApi.Infrastructure.CameraRuntime
         private readonly System.Collections.Concurrent.ConcurrentDictionary<int, CameraSessionRunner> _sessions = new();
         private readonly System.Collections.Concurrent.ConcurrentDictionary<int, string> _cameraNames = new();
         private readonly System.Collections.Concurrent.ConcurrentDictionary<int, string> _lastStatusSignatures = new();
+        private readonly System.Collections.Concurrent.ConcurrentDictionary<int, SemaphoreSlim> _cameraLocks = new();
         private readonly SemaphoreSlim _sessionLock = new(1, 1);
-        private static readonly TimeSpan ManualStartFrameTimeout = TimeSpan.FromSeconds(6);
+        private static readonly TimeSpan ManualStartFrameTimeout = TimeSpan.FromSeconds(12);
 
 
         public CameraOrchestrator(
@@ -65,7 +66,8 @@ namespace RealtimeEventApi.Infrastructure.CameraRuntime
 
         public async Task<CameraRuntimeCommandResult> StartCameraAsync(int cameraId, CancellationToken token = default)
         {
-            await _sessionLock.WaitAsync(token);
+            var camLock = _cameraLocks.GetOrAdd(cameraId, _ => new SemaphoreSlim(1, 1));
+            await camLock.WaitAsync(token);
             try
             {
                 if (_sessions.TryGetValue(cameraId, out var existingRunner))
@@ -147,7 +149,7 @@ namespace RealtimeEventApi.Infrastructure.CameraRuntime
             }
             finally
             {
-                _sessionLock.Release();
+                camLock.Release();
             }
         }
 
@@ -178,7 +180,8 @@ namespace RealtimeEventApi.Infrastructure.CameraRuntime
 
         public async Task<bool> StopCameraAsync(int cameraId, CancellationToken token = default)
         {
-            await _sessionLock.WaitAsync(token);
+            var camLock = _cameraLocks.GetOrAdd(cameraId, _ => new SemaphoreSlim(1, 1));
+            await camLock.WaitAsync(token);
             try
             {
                 if (!_sessions.TryGetValue(cameraId, out var runner))
@@ -202,7 +205,7 @@ namespace RealtimeEventApi.Infrastructure.CameraRuntime
             }
             finally
             {
-                _sessionLock.Release();
+                camLock.Release();
             }
         }
 

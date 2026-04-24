@@ -194,28 +194,57 @@ namespace RealtimeEventApi.Infrastructure.CameraRuntime
                         ? _streamUrl + "&rtsp_transport=tcp"
                         : _streamUrl + "?rtsp_transport=tcp";
 
-                    _logger.LogInformation("Opening stream... CameraId={CameraId}, Url={Url}", _cameraId, openUrl);
+                    var openStartTime = DateTime.Now;
+                    _logger.LogInformation("[DIAG] Opening stream... CameraId={CameraId}, StartAt={StartAt}, Url={Url}", _cameraId, openStartTime, openUrl);
 
-                    if (!cap.Open(openUrl, VideoCaptureAPIs.FFMPEG) || !cap.IsOpened())
+                    bool openSuccess = cap.Open(openUrl, VideoCaptureAPIs.FFMPEG) && cap.IsOpened();
+                    var openEndTime = DateTime.Now;
+                    var openDuration = openEndTime - openStartTime;
+
+                    if (!openSuccess)
                     {
+                        _logger.LogWarning("[DIAG] cap.Open FAILED. CameraId={CameraId}, EndAt={EndAt}, Duration={Duration}ms", _cameraId, openEndTime, openDuration.TotalMilliseconds);
                         var message = "스트림을 열지 못했습니다. RTSP URL, 네트워크, 포트포워딩을 확인하세요.";
                         SetStreamError(message);
-                        _logger.LogWarning("Failed to open stream. CameraId={CameraId}, Url={Url}", _cameraId, openUrl);
                         await Task.Delay(1500, token);
                         continue;
                     }
 
+                    _logger.LogInformation("[DIAG] cap.Open SUCCESS. CameraId={CameraId}, EndAt={EndAt}, Duration={Duration}ms", _cameraId, openEndTime, openDuration.TotalMilliseconds);
+
                     cap.Set(VideoCaptureProperties.BufferSize, 1);
 
                     ResetAnalysisStateForReconnect();
+                    _logger.LogInformation("[DIAG] Pre-warmup delay (1.5s). CameraId={CameraId}, Now={Now}", _cameraId, DateTime.Now);
                     await Task.Delay(1500, token);
+
+                    _logger.LogInformation("[DIAG] Warmup loop started. CameraId={CameraId}, Now={Now}", _cameraId, DateTime.Now);
+                    bool firstSuccessLogged = false;
 
                     for (int i = 0; i < 10; i++)
                     {
                         using var warmup = new Mat();
-                        cap.Read(warmup);
+                        bool readOk = cap.Read(warmup) && !warmup.Empty();
+                        if (readOk)
+                        {
+                            lock (_stateLock)
+                            {
+                                if (!firstSuccessLogged)
+                                {
+                                    _logger.LogInformation("[DIAG] First warmup frame SUCCESS. CameraId={CameraId}, Now={Now}, Iter={I}", _cameraId, DateTime.Now, i);
+                                    firstSuccessLogged = true;
+                                }
+                                _state.LastSuccessfulReadAt = DateTime.Now;
+                                _state.LastFrameAt = DateTime.Now;
+                            }
+                        }
+                        else
+                        {
+                             _logger.LogDebug("[DIAG] Warmup frame FAIL. CameraId={CameraId}, Iter={I}", _cameraId, i);
+                        }
                         await Task.Delay(30, token);
                     }
+                    _logger.LogInformation("[DIAG] Warmup loop finished. CameraId={CameraId}, Now={Now}", _cameraId, DateTime.Now);
 
                     using var frame = new Mat();
 

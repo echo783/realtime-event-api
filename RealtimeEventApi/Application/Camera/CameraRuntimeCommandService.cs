@@ -32,11 +32,21 @@ namespace RealtimeEventApi.Application.Camera
             if (cam == null)
                 return null;
 
-            var startResult = await _cameraRuntimeController.StartCameraAsync(cameraId, token);
-
-            if (startResult.Success && !cam.Enabled)
+            // 1. DB에 먼저 활성화 상태 기록 (Orchestrator 루프에서 세션이 제거되지 않도록 보호)
+            bool wasAlreadyEnabled = cam.Enabled;
+            if (!wasAlreadyEnabled)
             {
                 cam.Enabled = true;
+                await _context.SaveChangesAsync(token);
+            }
+
+            // 2. 실제 카메라 시작 시도 (내부에서 WaitForFirstFrameAsync로 대기)
+            var startResult = await _cameraRuntimeController.StartCameraAsync(cameraId, token);
+
+            // 3. 실패 시 Enabled 상태 롤백
+            if (!startResult.Success && !wasAlreadyEnabled)
+            {
+                cam.Enabled = false;
                 await _context.SaveChangesAsync(token);
             }
 

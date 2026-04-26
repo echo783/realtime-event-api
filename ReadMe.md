@@ -1,7 +1,10 @@
 ## realtime-event-api
+## What is this?
 
-RTSP 기반 영상 데이터를 실시간 이벤트로 변환하는 시스템
-Industrial Monitoring을 위한 Realtime Event Processing API
+RTSP 카메라 데이터를 실시간 이벤트로 변환하고  
+웹에서 상태를 확인할 수 있는 Industrial Monitoring API입니다.
+
+실시간 카메라 → 이벤트 → 상태 → 웹 UI까지 한 번에 연결되는 구조를 보여주는 프로젝트입니다.
 
 ## Vision
 

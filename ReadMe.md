@@ -11,6 +11,12 @@ RTSP 카메라 데이터를 실시간 이벤트로 변환하고
 기존 장비 중심 시스템에서 상태 공유가 어렵고  
 실시간 이벤트 흐름이 분산되는 문제를 해결하기 위해 만들었습니다.
 
+## 포트폴리오
+- docs/myport.pdf
+
+## Demo
+<img width="1317" height="917" alt="image" src="https://github.com/user-attachments/assets/00e50490-b59f-447a-81dd-f65ae6bcea7a" />
+
 ## Vision
 
 이 프로젝트는 단순한 영상 처리 시스템이 아니라,
@@ -177,5 +183,4 @@ LLM 기반 운영 분석 기능 추가
  2. 서버 실행
  3. /index.html 접속
 
-## 포트폴리오
-- docs/myport.pdf
+

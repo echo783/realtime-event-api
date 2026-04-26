@@ -1,37 +1,31 @@
-# realtime-event-api
+## realtime-event-api
 
-> RTSP 기반 영상 데이터를 실시간 이벤트로 변환하는 시스템  
-> AI와 협업하여 설계 및 구현된 Industrial Monitoring API
-
----
+RTSP 기반 영상 데이터를 실시간 이벤트로 변환하는 시스템
+Industrial Monitoring을 위한 Realtime Event Processing API
 
 ## Vision
 
-이 프로젝트는 단순한 영상 처리 시스템이 아니라,  
-**AI와 사람이 함께 시스템을 만들어가는 방식**을 실험하기 위해 시작되었습니다.
+이 프로젝트는 단순한 영상 처리 시스템이 아니라,
+물리 데이터(RTSP)를 이벤트와 상태로 변환하는 시스템 설계를 목표로 합니다.
 
-개발 과정에서 AI는 코드 생성 도구가 아니라  
-설계, 검증, UI, 구조 개선까지 함께 수행하는 **협업 파트너**로 활용되었습니다.
+개발 과정에서 AI는 코드 생성 도구가 아니라
+설계 검토, 구조 개선, UI 흐름까지 함께 수행하는 협업 파트너로 활용되었습니다.
 
-저는 그 결과들을 연결하고,  
-실제 동작하는 시스템으로 통합하는 역할을 수행했습니다.
-
-앞으로 개발은 특정 개인의 역량이 아니라  
-**AI와 협업하는 방식으로 확장되는 방향으로 변화할 것**이라고 생각합니다.
-
-이 프로젝트는 그 흐름을 기반으로 만들어졌습니다.
-
+저는 그 결과를 검증하고 연결하여
+실제로 동작하는 시스템으로 완성하는 역할을 수행했습니다.
 ---
 
 ## Overview
 
-RTSP 카메라 스트림을 기반으로  
-특정 영역(ROI)에서 발생하는 변화를 감지하고
+RTSP 카메라 스트림을 기반으로
+특정 영역(ROI)의 변화를 감지하고
 
-이를 **이벤트 → 상태 → API → UI** 흐름으로 변환하는 시스템입니다.
+이를 다음 흐름으로 변환합니다.
 
-운영자는 웹 UI를 통해  
-카메라 상태, 이벤트, ROI 설정을 실시간으로 제어할 수 있습니다.
+Event → State → API → UI
+
+운영자는 웹 UI를 통해
+카메라 상태와 이벤트를 실시간으로 확인하고 제어할 수 있습니다.
 
 ---
 
@@ -65,83 +59,105 @@ Application → External Service (HTTP)
                       ↓
          Realtime Vision Service (OCR)
 ```
+## 설계 포인트
 API 중심 구조
-Runtime / Application 분리
+Runtime / Application 책임 분리
 외부 AI 서비스와 유연한 연동 구조
 
-## Key Features
+## Camera Runtime Design
 
-- 영상 데이터를 이벤트로 변환하는 구조
-- ROI 기반 변화 감지를 통한 생산 이벤트 생성
-- 이벤트 → 상태 → API 흐름으로 데이터 구조화
-- SignalR 기반 실시간 상태 공유
-- 외부 OCR 서비스 연동을 통한 라벨 검증
+카메라 실행 상태는 단일 runner ownership 모델로 관리됩니다.
+
+CameraRuntimeRegistry
+→ cameraId별 runner 상태 관리
+CameraOrchestrator
+→ DB 기준 자동 실행 동기화 (BackgroundService)
+CameraRuntimeController
+→ 수동 Start / Stop 처리
+CameraRuntimeSessionLifecycle
+→ runner Stop / Dispose 책임
+CameraRuntimeStatusNotifier
+→ SignalR 상태 전파 책임
+
+핵심 설계
+TrySetRunner → 실행 소유권 획득
+TryTakeRunner → 종료 소유권 회수
+
+이를 통해
+
+중복 실행 방지
+종료 경합 방지
+상태 일관성 유지
+
+를 해결했습니다.
+## Key Features
+영상 데이터를 이벤트로 변환하는 구조
+ROI 기반 변화 감지를 통한 이벤트 생성
+이벤트 → 상태 → API 흐름 구조화
+SignalR 기반 실시간 상태 공유
+외부 OCR 서비스 연동을 통한 라벨 검증
 
 ## AI Collaboration
 
 AI는 코드 생성 도구가 아니라
 설계와 검증을 함께 수행하는 협업 파트너로 활용되었습니다.
 
-- 구조 설계 검토
-- 코드 생성 및 리팩터링
-- UI 흐름 개선
-
+AI 역할
+구조 설계 검토
+코드 생성 및 리팩터링
+UI 흐름 개선
 Human Role – CHANWOOK JEONG
+시스템 구조 설계
+AI 결과 검증 및 통합
+전체 시스템 완성
+Engineering Insight
 
-- 시스템 구조 설계
-- AI 결과 검증 통합
-- 시스템 완성
-
----
-
-## Engineering Insight
-
-AI는 시작을 쉽게 만들었습니다.
+AI는 개발의 시작을 빠르게 만들었습니다.
 
 하지만
 
-시스템을 설계하고  
-실제로 동작하는 구조로 완성하는 것은  
+구조를 설계하고
+시스템을 연결하고
+실제로 동작하게 만드는 과정은
+
 여전히 사람의 역할입니다.
-  
-**AI tools were used as engineering partners, not as shortcuts.
-Human judgment connected the AI-assisted outputs into one working system.**
+
+AI는 도구가 아니라,
+함께 문제를 해결하는 파트너입니다.
 
 ## Tech Stack
-- Backend: ASP.NET Core
-- Vision: OpenCvSharp
-- Realtime: SignalR
-- Database: MSSQL (EF Core + Dapper)
-- Frontend: HTML / JavaScript
-- External Dependencies
-- MediaMTX (RTSP Relay)
-- RTSP 스트림 중계
-- 실행 파일 필요
-- Realtime Vision Service
-- OCR 기반 ROI 라벨 검증
-- Python FastAPI 서비스
+Backend: ASP.NET Core
+Vision: OpenCvSharp
+Realtime: SignalR
+Database: MSSQL (EF Core + Dapper)
+Frontend: HTML / JavaScript
+External Dependencies
+MediaMTX
+→ RTSP 스트림 중계
+Realtime Vision Service
+→ OCR 기반 ROI 라벨 검증
+https://github.com/echo783/realtime-vision-service
+What This Project Represents
 
-- https://github.com/echo783/realtime-vision-service
+이 프로젝트는
 
-## What This Project Represents
-
-이 프로젝트는 
-
-- 실시간 데이터 흐름을 설계하고
-- 물리 장비 데이터를 이벤트와 상태로 변환하며
-- 시스템 전체를 하나의 구조로 연결하는 과정
+실시간 데이터 흐름을 설계하고
+물리 데이터를 이벤트와 상태로 변환하며
+시스템 전체를 하나의 구조로 연결하는 과정입니다.
 
 핵심은 코드가 아니라
 
-“데이터를 흐름으로 만들고
-흐름을 시스템으로 완성하는 과정”입니다.
+데이터를 흐름으로 만들고
+흐름을 시스템으로 완성하는 것
+
+입니다.
 
 ## Future Direction
-- Camera Runtime 인터페이스 분리
-- Detection 모듈 구조화
-- 이벤트 처리 고도화
-- AI 분석 기능 확장 (LLM 기반 운영 분석)
-- 실시간 시스템 아키텍처 고도화
+Camera Runtime 인터페이스 고도화
+Detection 모듈 구조화
+이벤트 처리 로직 확장
+LLM 기반 운영 분석 기능 추가
+실시간 아키텍처 고도화
 
 ## Quick Start (Database)
 

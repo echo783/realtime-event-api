@@ -1,161 +1,125 @@
-## realtime-event-api
-> RTSP 카메라 스트림을 실시간 이벤트와 상태로 변환하는 산업용 모니터링 API
+# realtime-event-api
+
+RTSP 카메라 스트림을 이벤트와 상태값으로 변환하고, ASP.NET Core API와 SignalR을 통해 실시간 UI로 전달하는 모니터링 API 프로젝트입니다.
 
 ## What is this?
-RTSP 카메라 스트림을 실시간 이벤트와 상태로 변환하고, 웹 UI로 모니터링할 수 있는 API 시스템입니다.
 
-## Key Features
-- RTSP → Event → State 구조
-- ROI 기반 변화 감지
-- Event → State → API 흐름 설계
-- SignalR 기반 실시간 상태 공유
-- OCR 기반 라벨 검증 연동
+이 프로젝트는 RTSP 카메라 영상을 단순 화면 출력에 그치지 않고, 특정 영역의 변화를 감지하여 이벤트로 만들고, 이를 상태값으로 관리한 뒤 API와 실시간 UI로 전달하는 구조를 검증한 포트폴리오입니다.
 
-## 포트폴리오
-- [Portfolio PDF](docs/myport.pdf)
+핵심 흐름은 다음과 같습니다.
 
-## Demo
-<img width="1317" height="917" alt="image" src="https://github.com/user-attachments/assets/00e50490-b59f-447a-81dd-f65ae6bcea7a" />
-
-
-## Why?
-기존 장비 중심 시스템에서 상태 공유가 어렵고  
-실시간 이벤트 흐름이 분산되는 문제를 해결하기 위해 만들었습니다.
-
-## Vision
-이 프로젝트는 단순한 영상 처리 시스템이 아니라,
-물리 데이터(RTSP)를 이벤트와 상태로 변환하는 시스템 설계를 목표로 합니다.
-
-개발 과정에서 AI는 코드 생성 도구가 아니라
-설계 검토, 구조 개선, UI 흐름까지 함께 수행하는 협업 파트너로 활용되었습니다.
-
----
-
-## Overview
-RTSP 카메라 스트림을 기반으로
-특정 영역(ROI)의 변화를 감지하고
-
-이를 다음 흐름으로 변환합니다.
-
-Event → State → API → UI
-
-운영자는 웹 UI를 통해
-카메라 상태와 이벤트를 실시간으로 확인하고 제어할 수 있습니다.
-
----
-
-## Core Flow
 ```text
 RTSP Stream
-   ↓
-Frame Processing (OpenCV)
-   ↓
-ROI Detection
-   ↓
-Event Generation
-   ↓
-State Management
-   ↓
-API (ASP.NET Core)
-   ↓
-Web UI (Realtime Dashboard)
+  → Frame Processing
+  → ROI Detection
+  → Event Generation
+  → State Management
+  → ASP.NET Core API
+  → SignalR Realtime UI
 ```
+
+## Why?
+
+기존 장비나 카메라 중심 시스템은 영상 데이터는 존재하지만, 운영자가 판단할 수 있는 이벤트와 상태값으로 정리되지 않는 경우가 많습니다.
+
+이 프로젝트는 물리 데이터인 RTSP 영상을 업무적으로 판단 가능한 이벤트와 상태값으로 변환하고, 이를 외부 화면과 시스템에 전달하는 구조를 목표로 했습니다.
+
+## Key Features
+
+* RTSP 카메라 스트림 수신
+* ROI 기반 변화 감지
+* 이벤트 생성 및 상태값 관리
+* ASP.NET Core 기반 API 구성
+* SignalR 기반 실시간 상태 전파
+* MSSQL 기반 이벤트/상태 데이터 관리
+* 외부 OCR 서비스 연동 구조
+* 카메라 실행 상태 Start / Stop 관리
 
 ## Architecture
-```text
-Controller → Application → Infrastructure
-                      ↓
-               Camera Runtime
-                      ↓
-                    MSSQL
 
-Application → External Service (HTTP)
-                      ↓
-         Realtime Vision Service (OCR)
+```text
+Controller
+  → Application
+  → Infrastructure
+  → Camera Runtime
+  → MSSQL
 ```
-## 설계 포인트
-- API 중심 구조
-- Runtime / Application 책임 분리
-- 외부 AI 서비스와 유연한 연동 구조
+
+외부 OCR 검증은 별도 서비스와 HTTP 기반으로 연동되도록 구성했습니다.
+
+```text
+Application
+  → External Vision Service
+  → OCR Result
+```
 
 ## Camera Runtime Design
-카메라 실행 상태는 단일 runner ownership 모델로 관리됩니다.
 
-### Components
-- **CameraRuntimeRegistry**: cameraId별 runner 상태 관리  
-- **CameraOrchestrator**: DB 기준 자동 실행 동기화 (BackgroundService)  
-- **CameraRuntimeController**: 수동 Start / Stop 처리  
-- **CameraRuntimeSessionLifecycle**: runner Stop / Dispose 책임  
-- **CameraRuntimeStatusNotifier**: SignalR 상태 전파  
+카메라 실행 상태는 cameraId 기준 단일 runner ownership 모델로 관리했습니다.
 
-## 핵심 설계
-TrySetRunner → 실행 소유권 획득,
-TryTakeRunner → 종료 소유권 회수
+주요 구성 요소는 다음과 같습니다.
 
-이를 통해 중복 실행 방지, 종료 경합 방지, 상태 일관성 유지 를 해결했습니다.
+* CameraRuntimeRegistry: cameraId별 runner 상태 관리
+* CameraOrchestrator: DB 기준 자동 실행 동기화
+* CameraRuntimeController: 수동 Start / Stop 처리
+* CameraRuntimeSessionLifecycle: runner Stop / Dispose 처리
+* CameraRuntimeStatusNotifier: SignalR 상태 전파
 
-> 카메라별 실행 상태를 단일 ownership 모델로 관리하여 동시성 문제를 방지합니다.
+핵심은 `TrySetRunner`와 `TryTakeRunner`를 통해 실행 소유권과 종료 소유권을 명확히 나눈 점입니다.
+
+이를 통해 카메라 중복 실행, 종료 경합, 상태 불일치 문제를 줄이고자 했습니다.
+
+## Tech Stack
+
+* Backend: ASP.NET Core
+* Realtime: SignalR
+* Vision: OpenCvSharp
+* Database: MSSQL, EF Core, Dapper
+* Frontend: HTML, JavaScript
+* External Service: OCR 기반 Realtime Vision Service
+* RTSP Relay: MediaMTX
+
+## Portfolio
+
+* Portfolio PDF: `docs/myport.pdf`
+* Realtime Vision Service: https://github.com/echo783/realtime-vision-service
 
 ## AI Collaboration
-AI는 코드 생성 도구가 아니라
-설계와 검증을 함께 수행하는 협업 파트너로 활용되었습니다.
 
-### AI 역할
-- 구조 설계 검토
-- 코드 생성 및 리팩터링
-- UI 흐름 개선
+개발 과정에서 AI 도구는 설계 검토, 코드 리팩터링, UI 흐름 개선에 보조적으로 활용했습니다.
 
-### Human Role
-- 시스템 구조 설계
-- AI 결과 검증 및 통합
-- 전체 시스템 완성
-
-AI는 개발의 시작을 빠르게 만들었습니다.
- 
-## Tech Stack
-- **Backend**: ASP.NET Core  
-- **Vision**: OpenCvSharp  
-- **Realtime**: SignalR  
-- **Database**: MSSQL (EF Core + Dapper)  
-- **Frontend**: HTML / JavaScript  
-
-### External Dependencies
-- **MediaMTX**: RTSP 스트림 중계  
-- **Realtime Vision Service**: OCR 기반 ROI 라벨 검증  
-  https://github.com/echo783/realtime-vision-service
-
-
-이 프로젝트는 실시간 데이터 흐름을 설계하고  
-물리 데이터를 이벤트와 상태로 변환하여  
-시스템 전체를 하나의 구조로 연결하는 과정입니다.
-
-개발 과정에서 AI는 코드 생성 도구가 아니라  
-설계 검토와 구조 개선을 함께 수행하는 협업 파트너로 활용되었습니다.
-
-하지만 구조를 설계하고, 시스템을 연결하며  
-실제로 동작하게 만드는 과정은 여전히 사람의 역할입니다.
-
-핵심은 코드 자체가 아니라  
-데이터를 흐름으로 만들고, 그 흐름을 시스템으로 완성하는 것입니다.
-
-## Future Direction
-Camera Runtime 인터페이스 고도화
-Detection 모듈 구조화
-이벤트 처리 로직 확장
-LLM 기반 운영 분석 기능 추가
-실시간 아키텍처 고도화
+다만 최종 구조 판단, 코드 통합, 기능 연결, 실행 검증은 직접 수행했습니다.
 
 ## Quick Start
 
 ### 1. Database
-- MSSQL (Express)
-- DB 생성: FactoryDB
-- docs/sql/schema-and-seed.sql 실행
+
+MSSQL Express 기준으로 테스트했습니다.
+
+```text
+Database: FactoryDB
+Script: docs/sql/schema-and-seed.sql
+```
 
 ### 2. Run Server
-- 서버 실행 후 `/login.html` 접속
 
-### 3. Login
-- ID: admin  
-- PW: 1234
+서버 실행 후 아래 페이지로 접속합니다.
 
+```text
+/login.html
+```
+
+### 3. Demo Login
+
+```text
+ID: admin
+PW: 1234
+```
+
+데모용 계정이며, 실제 운영 환경에서는 환경변수 또는 별도 인증 정책 적용이 필요합니다.
+
+## Project Message
+
+이 프로젝트의 핵심은 영상 처리 자체보다, 데이터를 이벤트로 만들고, 이벤트를 상태값으로 관리하며, 상태를 API와 실시간 UI로 연결하는 구조를 설계한 점입니다.
+
+기존 ERP 운영개발에서 다뤄온 상태값 처리, 업무 흐름, 외부 시스템 연동 경험을 C# / ASP.NET Core 기반 API 구조와 실시간 상태 전파 방식으로 확장해본 사례입니다.
